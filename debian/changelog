@@ -1,0 +1,7 @@
+libsvi (0.1.0-28) unstable; urgency=low
+
+  * Initial Release.
+  * Git: pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-28
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Wed, 07 Dec 2011 09:08:58 +0900

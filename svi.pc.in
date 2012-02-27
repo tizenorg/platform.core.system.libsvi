@@ -1,0 +1,11 @@
+prefix=@PREFIX@
+exec_prefix=@EXEC_PREFIX@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
+
+Name: svi
+Description: configuration system library
+Version: @VERSION@
+Requires: vconf mm-keysound devman_haptic dlog
+Libs: -L${libdir} -lsvi
+Cflags: -I${includedir}
