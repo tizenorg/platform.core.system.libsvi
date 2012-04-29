@@ -23,6 +23,9 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <mm_sound_private.h>
 #include <vconf.h>
 #include <devman_haptic.h>
