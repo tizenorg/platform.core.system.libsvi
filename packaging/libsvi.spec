@@ -5,6 +5,7 @@ Release:    30
 Group:      System/Libraries
 License:    Apache License, Version 2.0
 Source0:    %{name}-%{version}.tar.gz
+Source1001: packaging/libsvi.manifest 
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires:  cmake
@@ -27,6 +28,7 @@ Requires:   %{name} = %{version}-%{release}
 %setup -q 
 
 %build
+cp %{SOURCE1001} .
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
 make
 
@@ -39,11 +41,13 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %files
+%manifest libsvi.manifest
 %defattr(-,root,root,-)
 %{_bindir}/svi_test
 %{_libdir}/libsvi.so.*
 
 %files devel
+%manifest libsvi.manifest
 %defattr(-,root,root,-)
 %{_includedir}/svi/*.h
 %{_libdir}/libsvi.so
