@@ -1,7 +1,257 @@
+libsvi (0.1.2-2) unstable; urgency=low
+
+  * change SVI_VIB_OPERATION_LOTBATT to SVI_VIB_OPERATION_LOWBATT value
+  * Git: slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.2-2
+
+ -- Jiyoung Yun <jy910.yun@samsung.com>  Fri, 03 Aug 2012 16:00:47 +0900
+
+libsvi (0.1.1) unstable; urgency=low
+
+  * add new enum value (incoming call04,05,06 / sip_backspace)
+  * add svi_set_path function for supporting changable svi resource feature
+  * Git: slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.1
+
+ -- Hyungdeuk Kim <hd3.kim@samsung.com>  Thu, 28 Jun 2012 10:45:25 +0900
+
 libsvi (0.1.0-30) unstable; urgency=low
 
-  * Initial Release.
-  * Git: pkgs/l/libsvi
+  * upload changed spec file
+  * include sys/stat,sys/types header
+  * Git: slp/pkgs/l/libsvi
   * Tag: libsvi_0.1.0-30
 
- -- Sangil Yoon <si83.yoon@samsung.com>  Wed, 07 Dec 2011 09:08:58 +0900
+ -- Hyungdeuk Kim <hd3.kim@samsung.com>  Fri, 16 Mar 2012 00:45:25 +0900
+
+libsvi (0.1.0-29) unstable; urgency=low
+
+  * fix svi.c(strncpy). change to buf size from strlen in strncpy.
+  * Git: slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-29
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Fri, 16 Dec 2011 17:45:25 +0900
+
+libsvi (0.1.0-28) unstable; urgency=low
+
+  * Change API description in header file.
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-28
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Tue, 06 Dec 2011 14:06:09 +0900
+
+libsvi (0.1.0-27) unstable; urgency=low
+
+  * Changed boilerplate
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-27
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Fri, 02 Dec 2011 17:18:04 +0900
+
+libsvi (0.1.0-26) unstable; urgency=low
+
+  * change boilerplate. add check routine for file existence.
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-26
+
+ -- Sangil Yoon <seokkyu.jang@samsung.com>  Thu, 20 Oct 2011 08:52:34 +0900
+
+libsvi (0.1.0-25) unstable; urgency=low
+
+  * Remove dead code for prevent fix Run 84, CID 57783.
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-25
+
+ -- Seokkyu Jang <seokkyu.jang@samsung.com>  Mon, 05 Sep 2011 14:06:58 +0900
+
+libsvi (0.1.0-24) unstable; urgency=low
+
+  * Create svi_get_path() API.
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-24
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Wed, 24 Aug 2011 15:34:20 +0900
+
+libsvi (0.1.0-23) unstable; urgency=low
+
+  * remove deprecated enum & changed directory path
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-23
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Tue, 16 Aug 2011 19:32:23 +0900
+
+libsvi (0.1.0-22) unstable; urgency=low
+
+  * modify TETware TC Makefile.
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-22 
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Tue, 16 Aug 2011 11:15:37 +0900
+
+libsvi (0.1.0-21) unstable; urgency=low
+
+  * Rebuild libsvi for tagging
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-21
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Thu, 11 Aug 2011 13:47:36 +0900
+
+libsvi (0.1.0-20) unstable; urgency=low
+
+  * Add deprecated enum for prevent build-break. fixed some bugs.
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-20
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Wed, 03 Aug 2011 18:21:51 +0900
+
+libsvi (0.1.0-19) unstable; urgency=low
+
+  * Re-defined sound & vibration enum type.
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-19
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Mon, 01 Aug 2011 13:24:46 +0900
+
+libsvi (0.1.0-18) unstable; urgency=low
+
+  * change AUTHORS, boilerplate
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-18
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Wed, 13 Jul 2011 15:57:00 +0900
+
+libsvi (0.1.0-17) unstable; urgency=low
+
+  * Add boilerplate by code cleanup. change COPYING, AUTHORS
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-17
+
+ -- Sangil Yoon <si83.yoon@samsung.com>  Wed, 13 Jul 2011 15:04:51 +0900
+
+libsvi (0.1.0-16) unstable; urgency=low
+
+  * Modify TC
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-16 
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 16 Feb 2011 16:41:38 +0900
+
+libsvi (0.1.0-15) unstable; urgency=low
+
+  * Modify sound file path
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-15 
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 12 Jan 2011 16:10:35 +0900
+
+libsvi (0.1.0-14) unstable; urgency=low
+
+  * Update sound resource enumeration
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-14
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 29 Dec 2010 11:31:49 +0900
+
+libsvi (0.1.0-13) unstable; urgency=low
+
+  * Remove svi-data dependency
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-13
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 15 Dec 2010 18:01:30 +0900
+
+libsvi (0.1.0-12) unstable; urgency=low
+
+  * Remove svi-data dependency
+  * Git: slp-source.sec.samsung.net:slp/pkgs/l/libsvi
+  * Tag: libsvi_0.1.0-12
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 15 Dec 2010 17:55:44 +0900
+
+libsvi (0.1.0-11) unstable; urgency=low
+
+  * Remove svi-data dependency
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-11
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 15 Dec 2010 17:49:37 +0900
+
+libsvi (0.1.0-10) unstable; urgency=low
+
+  * Modify volume type for sound play
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-10
+
+ -- Noha Park <noha.park@samsung.com>  Fri, 03 Dec 2010 17:46:18 +0900
+
+libsvi (0.1.0-9) unstable; urgency=low
+
+  * Modify build dependency 
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-9
+
+ -- Noha Park <noha.park@samsung.com>  Thu, 18 Nov 2010 11:42:54 +0900
+
+libsvi (0.1.0-8) unstable; urgency=low
+
+  * Modify build dependency 
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-8
+
+ -- Noha Park <noha.park@samsung.com>  Thu, 18 Nov 2010 11:25:42 +0900
+
+libsvi (0.1.0-7) unstable; urgency=low
+
+  * Modify doxyzen
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-7
+
+ -- Noha Park <noha.park@samsung.com>  Thu, 18 Nov 2010 08:42:03 +0900
+
+libsvi (0.1.0-6) unstable; urgency=low
+
+  * Modify doxyzen
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-6
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 17 Nov 2010 15:24:13 +0900
+
+libsvi (0.1.0-5) unstable; urgency=low
+
+  * Modify control file
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-5
+
+ -- Noha Park <noha.park@samsung.com>  Mon, 15 Nov 2010 15:50:49 +0900
+
+libsvi (0.1.0-4) unstable; urgency=low
+
+  * remove data file
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-4
+
+ -- Noha Park <noha.park@samsung.com>  Fri, 12 Nov 2010 11:18:01 +0900
+
+libsvi (0.1.0-3) unstable; urgency=low
+
+  * Modify git repo
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-3
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 10 Nov 2010 08:59:31 +0900
+
+libsvi (0.1.0-2) unstable; urgency=low
+
+  * Update vibration key
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-2
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 03 Nov 2010 19:58:11 +0900
+
+libsvi (0.1.0-1) unstable; urgency=low
+
+  * Initial Release.
+  * Git: 165.213.180.234:/git/slp/pkgs/libsvi
+  * Tag: libsvi_0.1.0-1
+
+ -- Noha Park <noha.park@samsung.com>  Wed, 20 Oct 2010 11:32:44 +0900
