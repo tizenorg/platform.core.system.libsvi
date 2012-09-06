@@ -333,7 +333,7 @@ API int svi_play_vib(int handle, vibration_type vibration_key)
 
 				int ret = 0;
 				if (file_status == 0) {
-					ret = device_haptic_play_monotone_with_feedback_level(handle, 1000, vib_level);
+					ret = device_haptic_play_monotone_with_feedback_level(handle, 50, vib_level);
 					if (ret < 0) {
 						SVILOG("ERROR!! device_haptic_play_monotone_with_feedback_level returned error(%d).", ret);
 						return SVI_ERROR;

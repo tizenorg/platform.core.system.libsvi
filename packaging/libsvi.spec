@@ -50,7 +50,7 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/svi.pc
 
 %changelog
-* Thr Sep 06 2012 - Jiyoung Yun <jy910.yun@samsung.com>
+* Thu Sep 06 2012 - Jiyoung Yun <jy910.yun@samsung.com>
 - if there isnt' haptic resource, it plays monotone
 - Tag : libsvi_0.1.2-8
 
