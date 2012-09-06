@@ -300,6 +300,7 @@ API int svi_play_vib(int handle, vibration_type vibration_key)
 {
 	int ret_vib = SVI_SUCCESS;
 	int vib_lev = 0;
+	int file_status = -1;
 
 	if (handle < 0) {
 		SVILOG("ERROR!! Please call svi_init() for vibration init ");
@@ -317,22 +318,32 @@ API int svi_play_vib(int handle, vibration_type vibration_key)
 
 			if (vibstatus != 0) {
 
+				file_status = 1;
 				struct stat buf;
 				if(stat(haptic_file[vibration_key], &buf)) { /*check file existence*/
 					SVILOG("ERROR!! %s is not presents", haptic_file[vibration_key]);
 					if(__svi_restore_default_file(SVI_TYPE_VIB, vibration_key) == SVI_ERROR) {
 						SVILOG("ERROR!! __svi_restore_default_file(%d/%d) error", SVI_TYPE_VIB, vibration_key);
-						return SVI_ERROR;
+						file_status = 0;
+						SVILOG("file_status is changed (status : %d)", file_status);
 					} else {
 						SVILOG("%s is restored", haptic_file[vibration_key]);
 					}
 				}
 
 				int ret = 0;
-				ret = device_haptic_play_file(handle, haptic_file[vibration_key], 1, vib_lev);
-				if(ret < 0) {
-					SVILOG("ERROR!! device_haptic_play_file(%s) returned error(%d).", haptic_file[vibration_key], ret);
-					return SVI_ERROR;
+				if (file_status == 0) {
+					ret = device_haptic_play_monotone_with_feedback_level(handle, 1000, vib_level);
+					if (ret < 0) {
+						SVILOG("ERROR!! device_haptic_play_monotone_with_feedback_level returned error(%d).", ret);
+						return SVI_ERROR;
+					}
+				} else {
+					ret = device_haptic_play_file(handle, haptic_file[vibration_key], 1, vib_lev);
+					if(ret < 0) {
+						SVILOG("ERROR!! device_haptic_play_file(%s) returned error(%d).", haptic_file[vibration_key], ret);
+						return SVI_ERROR;
+					}
 				}
 			}
 		} else {

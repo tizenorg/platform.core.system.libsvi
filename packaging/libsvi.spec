@@ -1,7 +1,7 @@
 Name:       libsvi
 Summary:    SVI
 Version:    0.1.2
-Release:    7
+Release:    8
 Group:      System/Libraries
 License:    Apache License, Version 2.0
 Source0:    %{name}-%{version}.tar.gz
@@ -50,6 +50,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/svi.pc
 
 %changelog
+* Thr Sep 06 2012 - Jiyoung Yun <jy910.yun@samsung.com>
+- if there isnt' haptic resource, it plays monotone
+- Tag : libsvi_0.1.2-8
+
 * Mon Aug 20 2012 - Jiyoung Yun <jy910.yun@samsung.com>
 - Re-uploaded because prev commit is not supply on tizen_build project
 - Tag : libsvi_0.1.2-7
