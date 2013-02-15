@@ -1,0 +1,46 @@
+/*
+ * libfeedback
+ * Copyright (c) 2012 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+#ifndef __FEEDBACK_LEGACY_H__
+#define __FEEDBACK_LEGACY_H__
+
+#include "feedback-ids.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @file feedback-legacy.h
+ * @brief This file contains the feedback legacy API
+ */
+
+typedef void* feedback_h;
+
+int _feedback_init(feedback_h *handle);
+int _feedback_fini(feedback_h handle);
+int _feedback_play_sound(feedback_h handle, feedback_pattern_e key);
+int _feedback_play_vibration(feedback_h handle, feedback_pattern_e key);
+int _feedback_set_path(feedback_type_e type, feedback_pattern_e key, char* path);
+int _feedback_get_path(feedback_type_e type, feedback_pattern_e key, char* buf, unsigned int buflen);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif //__SVI_H__

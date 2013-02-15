@@ -1,0 +1,9 @@
+<manifest>
+	<request>
+		<domain name="_"/>
+	</request>
+	<assign>
+		<filesystem path="/usr/bin/svi_test" exec_label="_"/>
+	</assign>
+</manifest>
+
