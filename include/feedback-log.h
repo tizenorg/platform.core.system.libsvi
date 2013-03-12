@@ -16,17 +16,19 @@
  */
 
 
-#ifndef __SVI_LOG_H__
-#define __SVI_LOG_H__
+#ifndef __FEEDBACK_LOG_H__
+#define __FEEDBACK_LOG_H__
 
-#define FEATURE_SVI_DLOG
+#define FEATURE_FEEDBACK_DLOG
 
-#ifdef FEATURE_SVI_DLOG
-    #define LOG_TAG "SVI"
-    #include <dlog.h>
-    #define SVILOG(fmt, args...)  SLOGD("<%s:%4d> " fmt "\n", __func__, __LINE__, ##args)
+#ifdef FEATURE_FEEDBACK_DLOG
+	#define LOG_TAG "FEEDBACK"
+	#include <dlog.h>
+	#define FEEDBACK_LOG(fmt, args...)       SLOGD(fmt, ##args)
+	#define FEEDBACK_ERROR(fmt, args...)     SLOGE(fmt, ##args)
 #else
-    #define SVILOG(x, ...)
+	#define FEEDBACK_LOG(x, ...)
+	#define FEEDBACK_ERROR(x, ...)
 #endif
 
-#endif //__SVI_LOG_H__
+#endif //__FEEDBACK_LOG_H__

@@ -1,24 +1,20 @@
 /*
- *  libsvi
+ * libfeedback
+ * Copyright (c) 2012 Samsung Electronics Co., Ltd.
  *
- * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Seokkyu Jang <seokkyu.jang@samsung.com>
- * Contact: Sangil Yoon <si83.yoon@samsung.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 
 #ifndef __SVI_H__
 #define __SVI_H__
@@ -27,7 +23,7 @@
  * @addtogroup APPLICATION_FRAMEWORK
  * @{
  *
- * @defgroup    SVI SVI 
+ * @defgroup    SVI SVI
  * @brief       A library for playing sound and vibration.
  *
  * @section Header To use Them:
@@ -39,6 +35,7 @@
  * @code
 	SVI_VIB_TOUCH_TOUCH
 	SVI_VIB_TOUCH_SIP
+	SVI_VIB_TOUCH_SIP_BACKSPACE
 	SVI_VIB_TOUCH_HOLD
 	SVI_VIB_TOUCH_MULTI_TAP
 	SVI_VIB_TOUCH_HW_TAP
@@ -66,12 +63,12 @@
 	SVI_VIB_NOTIFICATION_SCHEDULE
 	SVI_VIB_NOTIFICATION_TIMER
 	SVI_VIB_NOTIFICATION_GENERAL
-    
+
 	SVI_VIB_OPERATION_POWER_ON
 	SVI_VIB_OPERATION_POWER_OFF
 	SVI_VIB_OPERATION_CHARGERCONN
-	SVI_VIB_OPERATION_FULLYCHARGED
-	SVI_VIB_OPERATION_LOTBATT
+	SVI_VIB_OPERATION_FULLCHARGED
+	SVI_VIB_OPERATION_LOWBATT
 	SVI_VIB_OPERATION_LOCK
 	SVI_VIB_OPERATION_UNLOCK
 	SVI_VIB_OPERATION_CALLCONNECT
@@ -82,6 +79,8 @@
 	SVI_VIB_OPERATION_SENDCHAT
 	SVI_VIB_OPERATION_ONOFFSLIDER
 	SVI_VIB_OPERATION_SHUTTER
+	SVI_VIB_OPERATION_LIST_REORDER
+	SVI_VIB_OPERATION_SLIDER_SWEEP
  * @endcode
  *
  * @section Snd_IDs Sound IDs
@@ -90,6 +89,7 @@
     SVI_SND_TOUCH_TOUCH2
     SVI_SND_TOUCH_TOUCH3
     SVI_SND_TOUCH_SIP
+    SVI_SND_TOUCH_SIP_BACKSPACE
     SVI_SND_TOUCH_HOLD
     SVI_SND_TOUCH_MULTI_TAP
     SVI_SND_TOUCH_HW_TAP
@@ -123,6 +123,8 @@
     SVI_SND_OPERATION_SENTCHAT
     SVI_SND_OPERATION_ONOFFSLIDER
     SVI_SND_OPERATION_SCRCAPTURE
+    SVI_SND_OPERATION_LIST_REORDER
+    SVI_SND_OPERATION_SLIDER_SWEEP
  * @endcode
  */
 
@@ -140,9 +142,6 @@ extern "C"
 
 #define SVI_SUCCESS	0
 #define SVI_ERROR	-1
-
-#define SVI_TYPE_SND 0
-#define SVI_TYPE_VIB 1
 
 /**
  * \par Description:
@@ -171,7 +170,7 @@ extern "C"
  * External Apps.
  *
  * \par Related functions:
- * svi_fini() 
+ * svi_fini()
  *
  * \par Known issues/bugs:
  * None
@@ -197,23 +196,23 @@ extern "C"
  * int handle = 0;
  *
  * r = svi_init(&handle); //Initialize SVI
- * 
+ *
  * if ( r != SVI_SUCCESS ) {
- *	printf("Cannot initialize SVI.\n");	
+ *	printf("Cannot initialize SVI.\n");
  *	svi_fini(handle); //If initialization is failed, finalize SVI directly
  * } else {
  *
- *	r = svi_play (handle, SVI_VIB_TOUCH_TOUCH, SVI_SND_TOUCH_TOUCH1); //Play sound and vibration 
+ *	r = svi_play (handle, SVI_VIB_TOUCH_TOUCH, SVI_SND_TOUCH_TOUCH1); //Play sound and vibration
  *	if (r != SVI_SUCCESS) {
  *		printf("Cannot play sound or vibration.\n");
  *	}
  *
  *	r = svi_fini(handle); //Finalize SVI
  *	if (r != SVI_SUCCESS) {
- *		printf("Cannot close SVI.\n");	
+ *		printf("Cannot close SVI.\n");
  *	}
  * }
- *                 
+ *
  * ...
  * \endcode
  */
@@ -247,7 +246,7 @@ int svi_init(int *handle);
  * External Apps.
  *
  * \par Related functions:
- * svi_init() 
+ * svi_init()
  *
  * \par Known issues/bugs:
  * None
@@ -273,9 +272,9 @@ int svi_init(int *handle);
  * int handle = 0;
  *
  * r = svi_init(&handle); //Initialize SVI
- * 
+ *
  * if ( r != SVI_SUCCESS ) {
- *	printf("Cannot initialize SVI.\n");	
+ *	printf("Cannot initialize SVI.\n");
  *	svi_fini(handle); //If initialization is failed, finalize SVI directly
  * } else {
  *
@@ -286,10 +285,10 @@ int svi_init(int *handle);
  *
  *	r = svi_fini(handle); //Finalize SVI
  *	if (r != SVI_SUCCESS) {
- *		printf("Cannot close SVI.\n");	
+ *		printf("Cannot close SVI.\n");
  *	}
  * }
- *                 
+ *
  * ...
  * \endcode
  */
@@ -348,25 +347,25 @@ int svi_fini(int handle);
  * ...
  * int r = 0;
  * int handle = 0;
- * 
+ *
  * r = svi_init(&handle); //Initialize SVI
- * 
+ *
  * if ( r != SVI_SUCCESS ) {
- *	printf("Cannot initialize SVI.\n");	
+ *	printf("Cannot initialize SVI.\n");
  *	svi_fini(handle); //If initialization is failed, finalize SVI directly
  * } else {
  *
- *	r = svi_play_sound (handle, SVI_SND_TOUCH_TOUCH1); //Play sound 
+ *	r = svi_play_sound (handle, SVI_SND_TOUCH_TOUCH1); //Play sound
  *	if (r != SVI_SUCCESS) {
  *		printf("Cannot play sound or vibration.\n");
  *	}
  *
  *	r = svi_fini(handle); //Finalize SVI
  *	if (r != SVI_SUCCESS) {
- *		printf("Cannot close SVI.\n");	
+ *		printf("Cannot close SVI.\n");
  *	}
  * }
- *                 
+ *
  * ...
  * \endcode
  */
@@ -424,11 +423,11 @@ int svi_play_sound(int handle, sound_type sound_key);
  * ...
  * int r = 0;
  * int handle = 0;
- * 
+ *
  * r = svi_init(&handle); //Initialize SVI
- * 
+ *
  * if ( r != SVI_SUCCESS ) {
- *	printf("Cannot initialize SVI.\n");	
+ *	printf("Cannot initialize SVI.\n");
  *	svi_fini(handle); //If initialization is failed, finalize SVI directly
  * } else {
  *
@@ -439,10 +438,10 @@ int svi_play_sound(int handle, sound_type sound_key);
  *
  *	r = svi_fini(handle); //Finalize SVI
  *	if (r != SVI_SUCCESS) {
- *		printf("Cannot close SVI.\n");	
+ *		printf("Cannot close SVI.\n");
  *	}
  * }
- *                 
+ *
  * ...
  * \endcode
  */
@@ -501,11 +500,11 @@ int svi_play_vib(int handle, vibration_type vibration_key);
  * ...
  * int r = 0;
  * int handle = 0;
- * 
+ *
  * r = svi_init(&handle); //Initialize SVI
- * 
+ *
  * if ( r != SVI_SUCCESS ) {
- *	printf("Cannot initialize SVI.\n");	
+ *	printf("Cannot initialize SVI.\n");
  *	svi_fini(handle); //If initialization is failed, finalize SVI directly.
  * } else {
  *
@@ -516,10 +515,10 @@ int svi_play_vib(int handle, vibration_type vibration_key);
  *
  *	r = svi_fini(handle); //Finalize SVI
  *	if (r != SVI_SUCCESS) {
- *		printf("Cannot close SVI.\n");	
+ *		printf("Cannot close SVI.\n");
  *	}
  * }
- *                 
+ *
  * ...
  * \endcode
  */
@@ -528,13 +527,77 @@ int svi_play(int handle, vibration_type vibration_key, sound_type sound_key);
 
 /**
  * \par Description:
- * Get filepath from predefined sound & vibration.\n
+ * Set filepath for sound & vibration pattern.\n
  *
  * \par Purpose:
- * This API is used for getting filepath of predefined sound or vibration.
+ * This API is used for setting filepath of sound & vibration pattern.
  *
  * \par Typical use case:
- * If user want to get filepath of sound or vibration for predefined simple pattern, he(or she) can use this API.
+ * In case that user want to set filepath of sound or vibration pattern.
+ *
+ * \par Method of function operation:
+ * SVI uses multimedia sound library and device manager library.
+ *
+ * \par Important notes:
+ * None
+ *
+ * \param svi_type 	[in]	svi_type(sound, vibration).
+ * \param svi_enum	[in]	predefined enum_type.
+ * \param path		[in]    file path.
+ *
+ * \return Return Type (int) \n
+ * - SVI_SUCCESS	- \n
+ * - SVI_ERROR	- \n
+ *
+ * \par Prospective clients:
+ * External Apps.
+ *
+ * \par Related functions:
+ * None
+ *
+ * \par Known issues/bugs:
+ * None
+ *
+ * \pre
+ * None
+ *
+ * \post
+ * None
+ *
+ * \see
+ * None
+ *
+ * \remarks
+ * None
+ *
+ * \par Sample code:
+ * \code
+ * ...
+ * #include <svi.h>
+ * ...
+ * int r = 0;
+ * char *path[512] = "/mnt/ums/sound/sound.wav";
+ *
+ * r = svi_set_path(SVI_SND_TYPE, SVI_SND_TOUCH_TOUCH1, path);
+ *
+ * if ( r != SVI_SUCCESS ) {
+ *	printf("Fail.\n");
+ * }
+ * ...
+ * \endcode
+ */
+/*================================================================================================*/
+int svi_set_path(int svi_type, int svi_enum, char* path);
+
+/**
+ * \par Description:
+ * Get filepath for sound & vibration pattern.\n
+ *
+ * \par Purpose:
+ * This API is used for getting filepath of sound & vibration pattern.
+ *
+ * \par Typical use case:
+ * In case that user want to get filepath of sound or vibration pattern.
  *
  * \par Method of function operation:
  * SVI uses multimedia sound library and device manager library.
@@ -578,13 +641,13 @@ int svi_play(int handle, vibration_type vibration_key, sound_type sound_key);
  * #include <svi.h>
  * ...
  * int r = 0;
- * char buf[256] = {0,};
- * 
+ * char buf[512] = {0,};
+ *
  * r = svi_get_path(SVI_SND_TYPE, SVI_SND_TOUCH_TOUCH1, buf, sizeof(buf));
- * 
+ *
  * if ( r != SVI_SUCCESS ) {
- *	printf("Fail.\n");	
- * }              
+ *	printf("Fail.\n");
+ * }
  * ...
  * \endcode
  */
