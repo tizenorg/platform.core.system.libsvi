@@ -82,6 +82,11 @@ API int feedback_play(feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
+	if (pattern == FEEDBACK_PATTERN_NONE) {
+		FEEDBACK_LOG("pattern is NONE");
+		return FEEDBACK_ERROR_NONE;
+	}
+
 	err = _feedback_play_sound(_feedback_handle, pattern);
 	if (FEEDBACK_FAILED(err)) {
 		FEEDBACK_ERROR("_feedback_play_sound is failed");
@@ -114,6 +119,11 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 	if (pattern < FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
 		FEEDBACK_ERROR("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	if (pattern == FEEDBACK_PATTERN_NONE) {
+		FEEDBACK_LOG("pattern is NONE");
+		return FEEDBACK_ERROR_NONE;
 	}
 
 	switch(type) {
@@ -163,6 +173,34 @@ API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e patt
 	}
 
 	*path = strdup(buf);
+
+	return FEEDBACK_ERROR_NONE;
+}
+
+API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e pattern, char* path)
+{
+	int err = -1;
+
+	if (path == NULL) {
+		FEEDBACK_ERROR("Invalid parameter : path(NULL)");
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	if (type <= FEEDBACK_TYPE_NONE || type >= FEEDBACK_TYPE_END) {
+		FEEDBACK_ERROR("Invalid parameter : type(%d)", type);
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	if (pattern <= FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
+		FEEDBACK_ERROR("Invalid parameter : pattern(%d)", pattern);
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	err = _feedback_set_path(type, pattern, path);
+	if (FEEDBACK_FAILED(err)) {
+		FEEDBACK_ERROR("_feedback_set_path is failed");
+		return FEEDBACK_ERROR_OPERATION_FAILED;
+	}
 
 	return FEEDBACK_ERROR_NONE;
 }

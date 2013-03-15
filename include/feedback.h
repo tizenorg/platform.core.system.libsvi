@@ -150,6 +150,28 @@ int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern);
 int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e pattern, char **path);
 
 /**
+ * @brief Sets the new file path of resource for the given feedback type and pattern.
+ *
+ * @details
+ * Depending on the type of each pattern resouorce has a different format. \n
+ * Currently, System supports two pattern types. \n
+ * #FEEDBACK_TYPE_SOUND type uses .wav format. \n
+ * #FEEDBACK_TYPE_VIBRATION type uses .ivt format. \n
+ * If the given pattern doesn't have a file for the type, @a path will return NULL.
+ *
+ * @param[in]  type      The pattern type
+ * @param[in]  pattern   The pre-defined pattern
+ * @param[in]  path      The new file path of resource for feedback type and pattern
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #FEEDBACK_ERROR_NONE               Successful
+ * @retval #FEEDBACK_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #FEEDBACK_ERROR_OPERATION_FAILED   Operation failed
+ *
+ */
+int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e pattern, char *path);
+
+/**
  * @}
  */
 

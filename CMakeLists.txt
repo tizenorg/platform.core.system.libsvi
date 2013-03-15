@@ -7,9 +7,13 @@ SET(LIBDIR "\${prefix}/lib")
 SET(INCLUDEDIR "\${prefix}/include/${PROJECT_NAME}")
 SET(VERSION 0.1.4)
 
+SET(SVI_DATA_PATH ${CMAKE_CURRENT_SOURCE_DIR}/svidata)
+SET(SVI_DATA_DIRS ${SVI_DATA_PATH}/svi)
+
 SET(SRCS
 	src/feedback.c
-	src/feedback-internal.c)
+	src/feedback-internal.c
+	src/xmlparser.c)
 
 SET(HEADERS
 	SLP_FEEDBACK_PG.h
@@ -25,7 +29,7 @@ SET(SVI_HEADERS
 SET(SVI_SRCS
 	src/svi.c)
 
-SET(DEPENDENTS "vconf haptic mm-keysound dlog")
+SET(DEPENDENTS "vconf haptic mm-keysound dlog libxml-2.0 glib-2.0")
 SET(PC_DEPENDENTS "capi-base-common")
 
 SET(PC_NAME ${PROJECT_NAME})
@@ -67,6 +71,10 @@ ENDFOREACH(hfile)
 FOREACH(hfile ${SVI_HEADERS})
 	INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${hfile} DESTINATION include/${SVI_NAME})
 ENDFOREACH(hfile)
+
+FOREACH(svidatadir ${SVI_DATA_DIRS})
+    INSTALL(DIRECTORY ${svidatadir} DESTINATION share)
+ENDFOREACH(svidatadir)
 
 INSTALL(TARGETS ${PROJECT_NAME} DESTINATION lib COMPONENT RuntimeLibraries)
 INSTALL(TARGETS ${SVI_NAME} DESTINATION lib COMPONENT RuntimeLibraries)
