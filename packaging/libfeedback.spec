@@ -62,7 +62,7 @@ svi resource package
 cp %{SOURCE1} .
 cp %{SOURCE2} .
 cp %{SOURCE3} .
-cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
+%cmake .
 make
 
 %install
