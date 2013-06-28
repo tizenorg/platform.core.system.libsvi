@@ -115,28 +115,31 @@ rm -rf %{_datadir}/svi/
 rm -rf /opt/share/svi/
 
 %files
-%manifest libfeedback.manifest
+%manifest %{name}.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libfeedback.so.*
 
 %files -n libfeedback-devel
+%manifest %{name}.manifest
 %defattr(-,root,root,-)
 %{_includedir}/feedback/*.h
 %{_libdir}/libfeedback.so
 %{_libdir}/pkgconfig/feedback.pc
 
 %files -n libsvi
-%manifest libsvi.manifest
+%manifest %{name}.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libsvi.so.*
 
 %files -n libsvi-devel
+%manifest %{name}.manifest
 %defattr(-,root,root-)
 %{_includedir}/svi/*.h
 %{_libdir}/libsvi.so
 %{_libdir}/pkgconfig/svi.pc
 
 %files -n svi-data
+%manifest %{name}.manifest
 %defattr(644,root,root,-)
 %{_datadir}/svi/*
 %defattr(666,app,app,-)
