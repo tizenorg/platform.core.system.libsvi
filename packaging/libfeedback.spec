@@ -5,9 +5,7 @@ Release:    0
 Group:      System/Libraries
 License:    Apache License, Version 2.0
 Source0:    %{name}-%{version}.tar.gz
-Source1:	libsvi.manifest
-source2:	libfeedback.manifest
-source3:	svi-data-sdk.manifest
+Source1001: %{name}.manifest
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires:  cmake
@@ -57,11 +55,9 @@ svi resource package
 
 %prep
 %setup -q 
+cp %{SOURCE1001} .
 
 %build
-cp %{SOURCE1} .
-cp %{SOURCE2} .
-cp %{SOURCE3} .
 %cmake .
 make
 
@@ -75,6 +71,10 @@ mkdir -p %{buildroot}/opt/share/svi/haptic/default
 mkdir -p %{buildroot}/opt/share/svi/haptic/touch
 
 %post -p /sbin/ldconfig
+
+%post -n libsvi -p /sbin/ldconfig
+
+%postun -n libsvi -p /sbin/ldconfig
 
 %post -n svi-data
 ln -s %{_datadir}/svi/sound/touch/key0.wav            /opt/share/svi/sound/touch
@@ -147,4 +147,3 @@ rm -rf /opt/share/svi/
 %dir /opt/share/svi/sound/operation
 %dir /opt/share/svi/haptic/default
 %dir /opt/share/svi/haptic/touch
-%manifest svi-data-sdk.manifest
