@@ -76,6 +76,10 @@ mkdir -p %{buildroot}/opt/share/svi/haptic/touch
 
 %post -p /sbin/ldconfig
 
+%post -n libsvi -p /sbin/ldconfig
+
+%postun -n libsvi -p /sbin/ldconfig
+
 %post -n svi-data
 ln -s %{_datadir}/svi/sound/touch/key0.wav            /opt/share/svi/sound/touch
 ln -s %{_datadir}/svi/sound/touch/key1.wav            /opt/share/svi/sound/touch
@@ -147,4 +151,3 @@ rm -rf /opt/share/svi/
 %dir /opt/share/svi/sound/operation
 %dir /opt/share/svi/haptic/default
 %dir /opt/share/svi/haptic/touch
-%manifest svi-data-sdk.manifest
