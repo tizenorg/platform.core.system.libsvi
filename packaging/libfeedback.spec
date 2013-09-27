@@ -7,7 +7,7 @@ License:    Apache License, Version 2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:	libsvi.manifest
 source2:	libfeedback.manifest
-source3:	svi-data-sdk.manifest
+source3:	svi-data.manifest
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires:  cmake
