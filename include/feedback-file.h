@@ -19,8 +19,8 @@
 #ifndef __FEEDBACK_FILE_H__
 #define __FEEDBACK_FILE_H__
 
-#define FEEDBACK_DATA_DIR			"/opt/share/svi"
-#define FEEDBACK_ORIGIN_DATA_DIR	"/usr/share/svi"
+#define FEEDBACK_DATA_DIR			"/opt/usr/share/feedback"
+#define FEEDBACK_ORIGIN_DATA_DIR	"/usr/share/feedback"
 
 #define FEEDBACK_SOUND_DIR			FEEDBACK_DATA_DIR"/sound"
 #define FEEDBACK_SOUND_TOUCH_DIR	FEEDBACK_SOUND_DIR"/touch"
