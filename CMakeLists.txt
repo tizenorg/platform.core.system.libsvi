@@ -11,6 +11,7 @@ SET(FEEDBACK_DATA_PATH ${CMAKE_CURRENT_SOURCE_DIR}/data)
 SET(FEEDBACK_DATA_DIRS ${FEEDBACK_DATA_PATH}/feedback)
 
 SET(SRCS
+	src/devices.c
 	src/feedback.c
 	src/feedback-internal.c
 	src/xmlparser.c)

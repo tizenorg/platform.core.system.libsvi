@@ -1,3 +1,6 @@
+* Fri Sep 26 2013 jy910.yun <jy910.yun@samsung.com> submit/tizen/20130913.132819@7b034f3
+- add device_ops structure for improving feedback structure
+
 * Fri Sep 27 2013 jy910.yun <jy910.yun@samsung.com> submit/tizen/20130913.132819@c1dfd9e
 - change the svi-data-sdk manifest file name
 - change the resource file locations to /opt/usr/share form /opt/share
