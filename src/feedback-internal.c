@@ -42,7 +42,7 @@
 
 #define DEFAULT_FEEDBACK_HANDLE		0x0F
 
-#define VIBRATION_XML				"/usr/share/svi/vibration.xml"
+#define VIBRATION_XML				"/usr/share/feedback/vibration.xml"
 
 typedef struct {
 	haptic_device_h v_handle;
