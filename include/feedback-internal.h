@@ -30,6 +30,12 @@ extern "C" {
  * @brief This file contains the feedback legacy API
  */
 
+#define FEEDBACK_DATA_DIR			"/opt/usr/share/feedback"
+#define FEEDBACK_ORIGIN_DATA_DIR	"/usr/share/feedback"
+
+#define FEEDBACK_RETRY_CNT       1
+#define MAX_FILE_PATH          512
+
 typedef void* feedback_h;
 
 int feedback_init(feedback_h *handle);
@@ -38,6 +44,10 @@ int feedback_play_sound(feedback_h handle, feedback_pattern_e key);
 int feedback_play_vibration(feedback_h handle, feedback_pattern_e key);
 int feedback_set_path(feedback_type_e type, feedback_pattern_e key, char* path);
 int feedback_get_path(feedback_type_e type, feedback_pattern_e key, char* buf, unsigned int buflen);
+
+int callstatus;
+
+feedback_pattern_e feedback_get_alert_on_call_key(feedback_pattern_e pattern);
 
 #ifdef __cplusplus
 }

@@ -12,6 +12,7 @@ SET(FEEDBACK_DATA_DIRS ${FEEDBACK_DATA_PATH}/feedback)
 
 SET(SRCS
 	src/devices.c
+	src/sound.c
 	src/feedback.c
 	src/feedback-internal.c
 	src/xmlparser.c)

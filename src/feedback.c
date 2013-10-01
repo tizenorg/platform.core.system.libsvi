@@ -21,6 +21,7 @@
 #include "feedback.h"
 #include "feedback-internal.h"
 #include "feedback-log.h"
+#include "devices.h"
 
 #define MAX_PATH_LENGTH      256
 #define NOT_ASSIGNED         NULL
@@ -40,6 +41,9 @@ API int feedback_initialize()
 		return FEEDBACK_ERROR_NONE;
 	}
 
+	/* initialize device */
+	devices_init();
+
 	err = feedback_init(&feedback_handle);
 	if (FEEDBACK_FAILED(err)) {
 		FEEDBACK_ERROR("feedback_init is failed");
@@ -57,6 +61,9 @@ API int feedback_deinitialize()
 		FEEDBACK_ERROR("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
+
+	/* deinitialize device */
+	devices_exit();
 
 	err = feedback_fini(feedback_handle);
 	if (FEEDBACK_FAILED(err)) {
@@ -87,11 +94,8 @@ API int feedback_play(feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_NONE;
 	}
 
-	err = feedback_play_sound(feedback_handle, pattern);
-	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("feedback_play_sound is failed");
-		return FEEDBACK_ERROR_OPERATION_FAILED;
-	}
+	/* play all device */
+	devices_play(pattern);
 
 	err = feedback_play_vibration(feedback_handle, pattern);
 	if (FEEDBACK_FAILED(err)) {
@@ -104,6 +108,7 @@ API int feedback_play(feedback_pattern_e pattern)
 
 API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 {
+	const struct device_ops *dev;
 	int err = -1;
 
 	if (feedback_handle == NOT_ASSIGNED) {
@@ -128,19 +133,21 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 
 	switch(type) {
 		case FEEDBACK_TYPE_SOUND:
-			err = feedback_play_sound(feedback_handle, pattern);
+			dev = find_device(type);
+			if (dev) {
+				err = dev->play(pattern);
+				if (err < 0)
+					FEEDBACK_ERROR("feedback_play_sound is failed");
+			}
 			break;
 		case FEEDBACK_TYPE_VIBRATION:
 			err = feedback_play_vibration(feedback_handle, pattern);
+			if (FEEDBACK_FAILED(err))
+				FEEDBACK_ERROR("feedback_play(type:%d) is failed", type);
 			break;
 		default:
 			FEEDBACK_ERROR("Invalid parameter : type(%d)", type);
 	        return FEEDBACK_ERROR_INVALID_PARAMETER;
-	}
-
-	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("feedback_play(type:%d) is failed", type);
-		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
 	return FEEDBACK_ERROR_NONE;
@@ -148,6 +155,7 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 
 API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e pattern, char** path)
 {
+	const struct device_ops *dev;
 	int err = -1;
 	char buf[MAX_PATH_LENGTH] = {0,};
 
@@ -166,19 +174,25 @@ API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e patt
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	err = feedback_get_path(type, pattern, buf, MAX_PATH_LENGTH);
+	if (type == FEEDBACK_TYPE_SOUND) {
+		dev = find_device(type);
+		if (dev)
+			err = dev->get_path(pattern, buf, sizeof(buf));
+	} else if (type == FEEDBACK_TYPE_VIBRATION)
+		err = feedback_get_path(type, pattern, buf, MAX_PATH_LENGTH);
+
 	if (FEEDBACK_FAILED(err)) {
 		FEEDBACK_ERROR("feedback_get_path is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
 	*path = strdup(buf);
-
 	return FEEDBACK_ERROR_NONE;
 }
 
 API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e pattern, char* path)
 {
+	const struct device_ops *dev;
 	int err = -1;
 
 	if (path == NULL) {
@@ -196,7 +210,13 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	err = feedback_set_path(type, pattern, path);
+	if (type == FEEDBACK_TYPE_SOUND) {
+		dev = find_device(type);
+		if (dev)
+			err = dev->set_path(pattern, path);
+	} else if (type == FEEDBACK_TYPE_VIBRATION)
+		err = feedback_set_path(type, pattern, path);
+
 	if (FEEDBACK_FAILED(err)) {
 		FEEDBACK_ERROR("feedback_set_path is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
