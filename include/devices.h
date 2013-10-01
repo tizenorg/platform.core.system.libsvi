@@ -31,6 +31,15 @@ struct device_ops {
 
 void devices_init(void);
 void devices_exit(void);
+void devices_play(int pattern);
+
+#ifndef __CONSTRUCTOR__
+#define __CONSTRUCTOR__ __attribute__ ((constructor))
+#endif
+
+#ifndef __DESTRUCTOR__
+#define __DESTRUCTOR__ __attribute__ ((destructor))
+#endif
 
 #define DEVICE_OPS_REGISTER(dev)	\
 static void __CONSTRUCTOR__ module_init(void)	\
