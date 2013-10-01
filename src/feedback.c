@@ -17,69 +17,89 @@
 
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
+#include <limits.h>
+#include <vconf.h>
+
 #include "feedback.h"
 #include "feedback-internal.h"
+#include "feedback-str.h"
 #include "feedback-log.h"
 #include "devices.h"
-
-#define MAX_PATH_LENGTH      256
-#define NOT_ASSIGNED         NULL
 
 #ifndef API
 #define API __attribute__ ((visibility("default")))
 #endif
 
-static feedback_h feedback_handle = NOT_ASSIGNED;
+int callstatus;
+
+static bool binit;
+
+static void feedback_callstatus_cb(keynode_t *key, void* data)
+{
+	callstatus = vconf_keynode_get_int(key);
+}
+
+static feedback_pattern_e get_alert_on_call_key(feedback_pattern_e pattern)
+{
+	switch(pattern) {
+	case FEEDBACK_PATTERN_MESSAGE:
+	case FEEDBACK_PATTERN_EMAIL:
+	case FEEDBACK_PATTERN_WAKEUP:
+	case FEEDBACK_PATTERN_SCHEDULE:
+	case FEEDBACK_PATTERN_TIMER:
+	case FEEDBACK_PATTERN_GENERAL:
+	case FEEDBACK_PATTERN_CHARGERCONN:
+	case FEEDBACK_PATTERN_FULLCHARGED:
+	case FEEDBACK_PATTERN_LOWBATT:
+		return (feedback_pattern_e)(pattern+1);
+	default:
+		break;
+	}
+
+	return pattern;
+}
 
 API int feedback_initialize()
 {
 	int err = -1;
 
-	if (feedback_handle != NOT_ASSIGNED) {
-		FEEDBACK_LOG("Already initialized");
+	if (binit)
 		return FEEDBACK_ERROR_NONE;
-	}
+
+	/* check call status */
+	if (vconf_get_int(VCONFKEY_CALL_STATE, &callstatus) < 0)
+		FEEDBACK_ERROR("vconf_get_int(VCONFKEY_CALL_STATE, &callstatus) ==> FAIL!!");
+
+	/* add watch for status value */
+	vconf_notify_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb, NULL);
 
 	/* initialize device */
 	devices_init();
 
-	err = feedback_init(&feedback_handle);
-	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("feedback_init is failed");
-		return FEEDBACK_ERROR_OPERATION_FAILED;
-	}
-
+	binit = true;
 	return FEEDBACK_ERROR_NONE;
 }
 
 API int feedback_deinitialize()
 {
-	int err = -1;
-
-	if (feedback_handle == NOT_ASSIGNED) {
-		FEEDBACK_ERROR("Not initialized");
+	if (!binit)
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
-	}
+
+	vconf_ignore_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb);
 
 	/* deinitialize device */
 	devices_exit();
 
-	err = feedback_fini(feedback_handle);
-	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("feedback_fini is failed");
-		return FEEDBACK_ERROR_OPERATION_FAILED;
-	}
-
-	feedback_handle = NOT_ASSIGNED;
+	binit = false;
 	return FEEDBACK_ERROR_NONE;
 }
 
 API int feedback_play(feedback_pattern_e pattern)
 {
-	int err = -1;
-
-	if (feedback_handle == NOT_ASSIGNED) {
+	/* check initialize */
+	if (!binit) {
 		FEEDBACK_ERROR("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
@@ -94,14 +114,14 @@ API int feedback_play(feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_NONE;
 	}
 
+	/* in case of call connected or connecting */
+	if (callstatus != VCONFKEY_CALL_OFF) {
+		pattern = get_alert_on_call_key(pattern);
+		FEEDBACK_LOG("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
+	}
+
 	/* play all device */
 	devices_play(pattern);
-
-	err = feedback_play_vibration(feedback_handle, pattern);
-	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("feedback_play_vibration is failed");
-		return FEEDBACK_ERROR_OPERATION_FAILED;
-	}
 
 	return FEEDBACK_ERROR_NONE;
 }
@@ -109,9 +129,10 @@ API int feedback_play(feedback_pattern_e pattern)
 API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 {
 	const struct device_ops *dev;
-	int err = -1;
+	int err;
 
-	if (feedback_handle == NOT_ASSIGNED) {
+	/* check initialize */
+	if (!binit) {
 		FEEDBACK_ERROR("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
@@ -131,23 +152,18 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_NONE;
 	}
 
-	switch(type) {
-		case FEEDBACK_TYPE_SOUND:
-			dev = find_device(type);
-			if (dev) {
-				err = dev->play(pattern);
-				if (err < 0)
-					FEEDBACK_ERROR("feedback_play_sound is failed");
-			}
-			break;
-		case FEEDBACK_TYPE_VIBRATION:
-			err = feedback_play_vibration(feedback_handle, pattern);
-			if (FEEDBACK_FAILED(err))
-				FEEDBACK_ERROR("feedback_play(type:%d) is failed", type);
-			break;
-		default:
-			FEEDBACK_ERROR("Invalid parameter : type(%d)", type);
-	        return FEEDBACK_ERROR_INVALID_PARAMETER;
+	/* in case of call connected or connecting */
+	if (callstatus != VCONFKEY_CALL_OFF) {
+		pattern = get_alert_on_call_key(pattern);
+		FEEDBACK_LOG("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
+	}
+
+	/* play proper device */
+	dev = find_device(type);
+	if (dev) {
+		err = dev->play(pattern);
+		if (err < 0)
+			FEEDBACK_ERROR("fail to play sound");
 	}
 
 	return FEEDBACK_ERROR_NONE;
@@ -156,8 +172,8 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e pattern, char** path)
 {
 	const struct device_ops *dev;
-	int err = -1;
-	char buf[MAX_PATH_LENGTH] = {0,};
+	char buf[PATH_MAX] = {0,};
+	int err;
 
 	if (path == NULL) {
 		FEEDBACK_ERROR("Invalid parameter : path(NULL)");
@@ -174,26 +190,22 @@ API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e patt
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (type == FEEDBACK_TYPE_SOUND) {
-		dev = find_device(type);
-		if (dev)
-			err = dev->get_path(pattern, buf, sizeof(buf));
-	} else if (type == FEEDBACK_TYPE_VIBRATION)
-		err = feedback_get_path(type, pattern, buf, MAX_PATH_LENGTH);
-
-	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("feedback_get_path is failed");
-		return FEEDBACK_ERROR_OPERATION_FAILED;
+	/* proper device get path */
+	dev = find_device(type);
+	if (dev) {
+		err = dev->get_path(pattern, buf, sizeof(buf));
+		if (err < 0)
+			return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
 	*path = strdup(buf);
 	return FEEDBACK_ERROR_NONE;
 }
 
-API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e pattern, char* path)
+API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e pattern, char *path)
 {
 	const struct device_ops *dev;
-	int err = -1;
+	int err;
 
 	if (path == NULL) {
 		FEEDBACK_ERROR("Invalid parameter : path(NULL)");
@@ -210,16 +222,12 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (type == FEEDBACK_TYPE_SOUND) {
-		dev = find_device(type);
-		if (dev)
-			err = dev->set_path(pattern, path);
-	} else if (type == FEEDBACK_TYPE_VIBRATION)
-		err = feedback_set_path(type, pattern, path);
-
-	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("feedback_set_path is failed");
-		return FEEDBACK_ERROR_OPERATION_FAILED;
+	/* proper device set path */
+	dev = find_device(type);
+	if (dev) {
+		err = dev->set_path(pattern, path);
+		if (err < 0)
+			return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
 	return FEEDBACK_ERROR_NONE;

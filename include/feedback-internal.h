@@ -34,7 +34,6 @@ extern "C" {
 #define FEEDBACK_ORIGIN_DATA_DIR	"/usr/share/feedback"
 
 #define FEEDBACK_RETRY_CNT       1
-#define MAX_FILE_PATH          512
 
 typedef void* feedback_h;
 
