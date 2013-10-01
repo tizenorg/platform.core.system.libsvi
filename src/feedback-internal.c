@@ -26,7 +26,6 @@
 #include <mm_sound_private.h>
 #include <vconf.h>
 #include <haptic.h>
-
 #include <fcntl.h>
 #include <errno.h>
 
@@ -57,57 +56,43 @@ static int vib_level;
 static int noti_level;
 static int callstatus;
 
-static void __feedback_sndstatus_cb(keynode_t *key, void* data)
+static void feedback_sndstatus_cb(keynode_t *key, void* data)
 {
 	sndstatus = vconf_keynode_get_bool(key);
-	FEEDBACK_LOG("[[[[[[[[[[[[[[sndstatus changed!! new sndstatus => %d", sndstatus);
-	return;
 }
 
-static void __feedback_touch_sndstatus_cb(keynode_t *key, void* data)
+static void feedback_touch_sndstatus_cb(keynode_t *key, void* data)
 {
 	touch_sndstatus = vconf_keynode_get_bool(key);
-	FEEDBACK_LOG("[[[[[[[[[[[[[[touch_sndstatus changed!! new touch_sndstatus => %d", touch_sndstatus);
-	return;
 }
 
-static void __feedback_soundon_cb(keynode_t *key, void* data)
+static void feedback_soundon_cb(keynode_t *key, void* data)
 {
 	soundon = vconf_keynode_get_int(key);
-	FEEDBACK_LOG("[[[[[[[[[[[[[[soundon changed!! new soundon => %d", soundon);
-	return;
 }
 
-static void __feedback_vibstatus_cb(keynode_t *key, void* data)
+static void feedback_vibstatus_cb(keynode_t *key, void* data)
 {
 	vibstatus = vconf_keynode_get_bool(key);
-	FEEDBACK_LOG("[[[[[[[[[[[[[[vibstatus changed!! new vibstatus => %d", vibstatus);
-	return;
 }
 
-static void __feedback_vib_cb(keynode_t *key, void* data)
+static void feedback_vib_cb(keynode_t *key, void* data)
 {
 	vib_level = vconf_keynode_get_int(key);
-	FEEDBACK_LOG("[[[[[[[[[[[[[[vib_level changed!! new vib_level => %d", vib_level);
-	return;
 }
 
-static void __feedback_noti_cb(keynode_t *key, void* data)
+static void feedback_noti_cb(keynode_t *key, void* data)
 {
 	noti_level = vconf_keynode_get_int(key);
-	FEEDBACK_LOG("[[[[[[[[[[[[[[noti_level changed!! new noti_level => %d", noti_level);
-	return;
 }
 
 
-static void __feedback_callstatus_cb(keynode_t *key, void* data)
+static void feedback_callstatus_cb(keynode_t *key, void* data)
 {
 	callstatus = vconf_keynode_get_int(key);
-	FEEDBACK_LOG("[[[[[[[[[[[[[[callstatus changed!! new callstatus => %d", callstatus);
-	return;
 }
 
-static feedback_pattern_e __feedback_get_alert_on_call_key(feedback_pattern_e pattern)
+static feedback_pattern_e feedback_get_alert_on_call_key(feedback_pattern_e pattern)
 {
 	switch(pattern) {
 	case FEEDBACK_PATTERN_MESSAGE:
@@ -127,7 +112,7 @@ static feedback_pattern_e __feedback_get_alert_on_call_key(feedback_pattern_e pa
 	return pattern;
 }
 
-static haptic_priority_e __feedback_get_priority(feedback_pattern_e pattern)
+static haptic_priority_e feedback_get_priority(feedback_pattern_e pattern)
 {
 	if (pattern >= FEEDBACK_PATTERN_TAP && pattern <= FEEDBACK_PATTERN_HW_HOLD)
 		return HAPTIC_PRIORITY_MIN;
@@ -135,7 +120,7 @@ static haptic_priority_e __feedback_get_priority(feedback_pattern_e pattern)
 	return HAPTIC_PRIORITY_MIDDLE;
 }
 
-static volume_type_t __feedback_get_volume_type(feedback_pattern_e pattern)
+static volume_type_t feedback_get_volume_type(feedback_pattern_e pattern)
 {
 	if (pattern == FEEDBACK_PATTERN_TAP)
 		return VOLUME_TYPE_SYSTEM|VOLUME_GAIN_TOUCH;
@@ -147,7 +132,7 @@ static volume_type_t __feedback_get_volume_type(feedback_pattern_e pattern)
 	return VOLUME_TYPE_SYSTEM;
 }
 
-static int __feedback_get_haptic_level(feedback_pattern_e pattern)
+static int feedback_get_haptic_level(feedback_pattern_e pattern)
 {
 	int level = -1;
 
@@ -168,7 +153,7 @@ static int __feedback_get_haptic_level(feedback_pattern_e pattern)
 	return level;
 }
 
-static bool __feedback_get_always_alert_case(feedback_pattern_e pattern)
+static bool feedback_get_always_alert_case(feedback_pattern_e pattern)
 {
 	switch(pattern) {
 	case FEEDBACK_PATTERN_WAKEUP:
@@ -180,7 +165,7 @@ static bool __feedback_get_always_alert_case(feedback_pattern_e pattern)
 	return false;
 }
 
-static int __feedback_get_data(xmlDocPtr doc, feedback_pattern_e pattern, struct xmlData **data)
+static int feedback_get_data(xmlDocPtr doc, feedback_pattern_e pattern, struct xmlData **data)
 {
 	xmlNodePtr cur;
 	struct xmlData *retData;
@@ -201,7 +186,7 @@ static int __feedback_get_data(xmlDocPtr doc, feedback_pattern_e pattern, struct
 	return 0;
 }
 
-static void __feedback_release_data(struct xmlData *data)
+static void feedback_release_data(struct xmlData *data)
 {
 	if (data == NULL)
 		return;
@@ -209,7 +194,7 @@ static void __feedback_release_data(struct xmlData *data)
 	xml_free(data);
 }
 
-static int __feedback_change_symlink(const char *sym_path, const char *new_path)
+static int feedback_change_symlink(const char *sym_path, const char *new_path)
 {
 	struct stat buf;
 
@@ -241,7 +226,7 @@ static int __feedback_change_symlink(const char *sym_path, const char *new_path)
 	return FEEDBACK_ERROR_NONE;
 }
 
-static int __feedback_restore_default_file(feedback_type_e type, feedback_pattern_e pattern)
+static int feedback_restore_default_file(feedback_type_e type, feedback_pattern_e pattern)
 {
 	const char *cur_path = NULL;
 	char default_path[MAX_FILE_PATH] = {0,};
@@ -274,7 +259,7 @@ static int __feedback_restore_default_file(feedback_type_e type, feedback_patter
 	strcat(temp, cur_path+strlen(FEEDBACK_DATA_DIR));
 	FEEDBACK_LOG("default_path : %s", default_path);
 
-	ret = __feedback_change_symlink(cur_path, default_path);
+	ret = feedback_change_symlink(cur_path, default_path);
 	if (FEEDBACK_FAILED(ret)) {
 		FEEDBACK_ERROR("change_symlink is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
@@ -283,7 +268,7 @@ static int __feedback_restore_default_file(feedback_type_e type, feedback_patter
 	return FEEDBACK_ERROR_NONE;
 }
 
-int _feedback_init(feedback_h *handle)
+int feedback_init(feedback_h *handle)
 {
 	FEEDBACK_HANDLE *phandle;
 	haptic_device_h v_handle;
@@ -345,13 +330,13 @@ int _feedback_init(feedback_h *handle)
 	}
 
 	/* add watch for status value */
-	vconf_notify_key_changed(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, __feedback_sndstatus_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, __feedback_touch_sndstatus_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_SOUND_STATUS, __feedback_soundon_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, __feedback_vibstatus_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_SETAPPL_TOUCH_FEEDBACK_VIBRATION_LEVEL_INT, __feedback_vib_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT, __feedback_noti_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_CALL_STATE, __feedback_callstatus_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, feedback_sndstatus_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, feedback_touch_sndstatus_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_SOUND_STATUS, feedback_soundon_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, feedback_vibstatus_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_SETAPPL_TOUCH_FEEDBACK_VIBRATION_LEVEL_INT, feedback_vib_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT, feedback_noti_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb, NULL);
 
 	FEEDBACK_LOG("vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) ==> %d", sndstatus);
 	FEEDBACK_LOG("vconf_get_bool(VCONFKEY_SETAPPL_....UNDS_BOOL, &touch_sndstatus) ==> %d", touch_sndstatus);
@@ -369,7 +354,7 @@ int _feedback_init(feedback_h *handle)
 	return FEEDBACK_ERROR_NONE;
 }
 
-int _feedback_fini(feedback_h handle)
+int feedback_fini(feedback_h handle)
 {
 	FEEDBACK_HANDLE *phandle = (FEEDBACK_HANDLE *)handle;
 	int ret = -1;
@@ -392,18 +377,18 @@ int _feedback_fini(feedback_h handle)
 
 	free(phandle);
 
-	vconf_ignore_key_changed(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, __feedback_sndstatus_cb);
-	vconf_ignore_key_changed(VCONFKEY_SOUND_STATUS, __feedback_soundon_cb);
-	vconf_ignore_key_changed(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, __feedback_touch_sndstatus_cb);
-	vconf_ignore_key_changed(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, __feedback_vibstatus_cb);
-	vconf_ignore_key_changed(VCONFKEY_SETAPPL_TOUCH_FEEDBACK_VIBRATION_LEVEL_INT, __feedback_vib_cb);
-	vconf_ignore_key_changed(VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT, __feedback_noti_cb);
-	vconf_ignore_key_changed(VCONFKEY_CALL_STATE, __feedback_callstatus_cb);
+	vconf_ignore_key_changed(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, feedback_sndstatus_cb);
+	vconf_ignore_key_changed(VCONFKEY_SOUND_STATUS, feedback_soundon_cb);
+	vconf_ignore_key_changed(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, feedback_touch_sndstatus_cb);
+	vconf_ignore_key_changed(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, feedback_vibstatus_cb);
+	vconf_ignore_key_changed(VCONFKEY_SETAPPL_TOUCH_FEEDBACK_VIBRATION_LEVEL_INT, feedback_vib_cb);
+	vconf_ignore_key_changed(VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT, feedback_noti_cb);
+	vconf_ignore_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb);
 
 	return FEEDBACK_ERROR_NONE;
 }
 
-int _feedback_play_sound(feedback_h handle, feedback_pattern_e pattern)
+int feedback_play_sound(feedback_h handle, feedback_pattern_e pattern)
 {
 	int ret = -1;
 	int retry = FEEDBACK_RETRY_CNT;
@@ -414,7 +399,7 @@ int _feedback_play_sound(feedback_h handle, feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (sndstatus == 0 && !__feedback_get_always_alert_case(pattern)) {
+	if (sndstatus == 0 && !feedback_get_always_alert_case(pattern)) {
 		FEEDBACK_LOG("Sound condition is OFF (sndstatus : %d)", sndstatus);
 		return FEEDBACK_ERROR_NONE;
 	}
@@ -430,7 +415,7 @@ int _feedback_play_sound(feedback_h handle, feedback_pattern_e pattern)
 	}
 
 	if (callstatus != VCONFKEY_CALL_OFF) {
-		pattern = __feedback_get_alert_on_call_key(pattern);
+		pattern = feedback_get_alert_on_call_key(pattern);
 		FEEDBACK_LOG("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
 	}
 
@@ -441,16 +426,16 @@ int _feedback_play_sound(feedback_h handle, feedback_pattern_e pattern)
 
 	if (stat(snd_file[pattern], &buf)) {
 		FEEDBACK_ERROR("%s is not presents", snd_file[pattern]);
-		ret = __feedback_restore_default_file(FEEDBACK_TYPE_SOUND, pattern);
+		ret = feedback_restore_default_file(FEEDBACK_TYPE_SOUND, pattern);
 		if (FEEDBACK_FAILED(ret)) {
-			FEEDBACK_ERROR("__feedback_restore_default_file(%s) error", str_pattern[pattern]);
+			FEEDBACK_ERROR("feedback_restore_default_file(%s) error", str_pattern[pattern]);
 			return FEEDBACK_ERROR_OPERATION_FAILED;
 		}
 		FEEDBACK_LOG("%s is restored", snd_file[pattern]);
 	}
 
 	do {
-		ret = mm_sound_play_keysound(snd_file[pattern], __feedback_get_volume_type(pattern));
+		ret = mm_sound_play_keysound(snd_file[pattern], feedback_get_volume_type(pattern));
 		if (ret == MM_ERROR_NONE) {
 			FEEDBACK_LOG("Play success! SND filename is %s", snd_file[pattern]);
 			return FEEDBACK_ERROR_NONE;
@@ -461,7 +446,7 @@ int _feedback_play_sound(feedback_h handle, feedback_pattern_e pattern)
 	return FEEDBACK_ERROR_OPERATION_FAILED;
 }
 
-int _feedback_play_vibration(feedback_h handle, feedback_pattern_e pattern)
+int feedback_play_vibration(feedback_h handle, feedback_pattern_e pattern)
 {
 	FEEDBACK_HANDLE *phandle = (FEEDBACK_HANDLE *)handle;
 	int ret;
@@ -478,42 +463,42 @@ int _feedback_play_vibration(feedback_h handle, feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
-	if (vibstatus == 0 && !__feedback_get_always_alert_case(pattern))  {
+	if (vibstatus == 0 && !feedback_get_always_alert_case(pattern))  {
 		FEEDBACK_LOG("Vibration condition is OFF (vibstatus : %d)", vibstatus);
 		return FEEDBACK_ERROR_NONE;
 	}
 
 	if (callstatus != VCONFKEY_CALL_OFF) {
-		pattern = __feedback_get_alert_on_call_key(pattern);
+		pattern = feedback_get_alert_on_call_key(pattern);
 		FEEDBACK_LOG("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
 	}
 
-	ret = __feedback_get_data(phandle->v_doc, pattern, &data);
+	ret = feedback_get_data(phandle->v_doc, pattern, &data);
 	if (ret < 0) {
-		FEEDBACK_ERROR("__feedback_get_vibration_data fail");
+		FEEDBACK_ERROR("feedback_get_vibration_data fail");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
 	if (data->data == NULL) {
 		FEEDBACK_LOG("This case(%s) does not play vibration", str_pattern[pattern]);
-		__feedback_release_data(data);
+		feedback_release_data(data);
 		return FEEDBACK_ERROR_NONE;
 	}
 
 	/* play haptic buffer */
 	ret = haptic_vibrate_buffer_with_detail(phandle->v_handle, data->data, HAPTIC_ITERATION_ONCE,
-					__feedback_get_haptic_level(pattern), __feedback_get_priority(pattern), NULL);
+					feedback_get_haptic_level(pattern), feedback_get_priority(pattern), NULL);
 	if (ret != HAPTIC_ERROR_NONE) {
 		FEEDBACK_ERROR("haptic_vibrate_buffer_with_detail is failed");
-		__feedback_release_data(data);
+		feedback_release_data(data);
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
-	__feedback_release_data(data);
+	feedback_release_data(data);
 	return FEEDBACK_ERROR_NONE;
 }
 
-int _feedback_set_path(feedback_type_e type, feedback_pattern_e pattern, char* path)
+int feedback_set_path(feedback_type_e type, feedback_pattern_e pattern, char* path)
 {
 	const char* cur_path = NULL;
 	int ret = -1;
@@ -549,7 +534,7 @@ int _feedback_set_path(feedback_type_e type, feedback_pattern_e pattern, char* p
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
-	ret = __feedback_change_symlink(cur_path, path);
+	ret = feedback_change_symlink(cur_path, path);
 	if (FEEDBACK_FAILED(ret)) {
 		FEEDBACK_ERROR("change_symlink is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
@@ -558,7 +543,7 @@ int _feedback_set_path(feedback_type_e type, feedback_pattern_e pattern, char* p
 	return FEEDBACK_ERROR_NONE;
 }
 
-int _feedback_get_path(feedback_type_e type, feedback_pattern_e pattern, char* buf, unsigned int buflen)
+int feedback_get_path(feedback_type_e type, feedback_pattern_e pattern, char* buf, unsigned int buflen)
 {
 	const char* cur_path = NULL;
 	int retry = FEEDBACK_RETRY_CNT;
