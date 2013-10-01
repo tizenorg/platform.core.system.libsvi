@@ -81,3 +81,14 @@ void devices_exit(void)
 			dev->exit();
 	}
 }
+
+void devices_play(int pattern)
+{
+	dd_list *elem;
+	const struct device_ops *dev;
+
+	DD_LIST_FOREACH(dev_head, elem, dev) {
+		if (dev->play)
+			dev->play(pattern);
+	}
+}
