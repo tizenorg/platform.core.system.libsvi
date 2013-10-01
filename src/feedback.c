@@ -29,20 +29,20 @@
 #define API __attribute__ ((visibility("default")))
 #endif
 
-static feedback_h _feedback_handle = NOT_ASSIGNED;
+static feedback_h feedback_handle = NOT_ASSIGNED;
 
 API int feedback_initialize()
 {
 	int err = -1;
 
-	if (_feedback_handle != NOT_ASSIGNED) {
+	if (feedback_handle != NOT_ASSIGNED) {
 		FEEDBACK_LOG("Already initialized");
 		return FEEDBACK_ERROR_NONE;
 	}
 
-	err = _feedback_init(&_feedback_handle);
+	err = feedback_init(&feedback_handle);
 	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("_feedback_init is failed");
+		FEEDBACK_ERROR("feedback_init is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
@@ -53,18 +53,18 @@ API int feedback_deinitialize()
 {
 	int err = -1;
 
-	if (_feedback_handle == NOT_ASSIGNED) {
+	if (feedback_handle == NOT_ASSIGNED) {
 		FEEDBACK_ERROR("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
 
-	err = _feedback_fini(_feedback_handle);
+	err = feedback_fini(feedback_handle);
 	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("_feedback_fini is failed");
+		FEEDBACK_ERROR("feedback_fini is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
-	_feedback_handle = NOT_ASSIGNED;
+	feedback_handle = NOT_ASSIGNED;
 	return FEEDBACK_ERROR_NONE;
 }
 
@@ -72,7 +72,7 @@ API int feedback_play(feedback_pattern_e pattern)
 {
 	int err = -1;
 
-	if (_feedback_handle == NOT_ASSIGNED) {
+	if (feedback_handle == NOT_ASSIGNED) {
 		FEEDBACK_ERROR("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
@@ -87,15 +87,15 @@ API int feedback_play(feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_NONE;
 	}
 
-	err = _feedback_play_sound(_feedback_handle, pattern);
+	err = feedback_play_sound(feedback_handle, pattern);
 	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("_feedback_play_sound is failed");
+		FEEDBACK_ERROR("feedback_play_sound is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
-	err = _feedback_play_vibration(_feedback_handle, pattern);
+	err = feedback_play_vibration(feedback_handle, pattern);
 	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("_feedback_play_vibration is failed");
+		FEEDBACK_ERROR("feedback_play_vibration is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
@@ -106,7 +106,7 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 {
 	int err = -1;
 
-	if (_feedback_handle == NOT_ASSIGNED) {
+	if (feedback_handle == NOT_ASSIGNED) {
 		FEEDBACK_ERROR("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
@@ -128,10 +128,10 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 
 	switch(type) {
 		case FEEDBACK_TYPE_SOUND:
-			err = _feedback_play_sound(_feedback_handle, pattern);
+			err = feedback_play_sound(feedback_handle, pattern);
 			break;
 		case FEEDBACK_TYPE_VIBRATION:
-			err = _feedback_play_vibration(_feedback_handle, pattern);
+			err = feedback_play_vibration(feedback_handle, pattern);
 			break;
 		default:
 			FEEDBACK_ERROR("Invalid parameter : type(%d)", type);
@@ -139,7 +139,7 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 	}
 
 	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("_feedback_play(type:%d) is failed", type);
+		FEEDBACK_ERROR("feedback_play(type:%d) is failed", type);
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
@@ -166,9 +166,9 @@ API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e patt
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	err = _feedback_get_path(type, pattern, buf, MAX_PATH_LENGTH);
+	err = feedback_get_path(type, pattern, buf, MAX_PATH_LENGTH);
 	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("_feedback_get_path is failed");
+		FEEDBACK_ERROR("feedback_get_path is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
@@ -196,9 +196,9 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	err = _feedback_set_path(type, pattern, path);
+	err = feedback_set_path(type, pattern, path);
 	if (FEEDBACK_FAILED(err)) {
-		FEEDBACK_ERROR("_feedback_set_path is failed");
+		FEEDBACK_ERROR("feedback_set_path is failed");
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 

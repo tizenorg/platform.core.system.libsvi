@@ -32,12 +32,12 @@ extern "C" {
 
 typedef void* feedback_h;
 
-int _feedback_init(feedback_h *handle);
-int _feedback_fini(feedback_h handle);
-int _feedback_play_sound(feedback_h handle, feedback_pattern_e key);
-int _feedback_play_vibration(feedback_h handle, feedback_pattern_e key);
-int _feedback_set_path(feedback_type_e type, feedback_pattern_e key, char* path);
-int _feedback_get_path(feedback_type_e type, feedback_pattern_e key, char* buf, unsigned int buflen);
+int feedback_init(feedback_h *handle);
+int feedback_fini(feedback_h handle);
+int feedback_play_sound(feedback_h handle, feedback_pattern_e key);
+int feedback_play_vibration(feedback_h handle, feedback_pattern_e key);
+int feedback_set_path(feedback_type_e type, feedback_pattern_e key, char* path);
+int feedback_get_path(feedback_type_e type, feedback_pattern_e key, char* buf, unsigned int buflen);
 
 #ifdef __cplusplus
 }
