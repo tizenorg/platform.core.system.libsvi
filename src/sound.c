@@ -266,11 +266,6 @@ static int sound_play(feedback_pattern_e pattern)
 		return 0;
 	}
 
-	if (callstatus != VCONFKEY_CALL_OFF) {
-		pattern = feedback_get_alert_on_call_key(pattern);
-		FEEDBACK_LOG("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
-	}
-
 	if (sound_file[pattern] == NULL) {
 		FEEDBACK_LOG("This case(%s) does not play sound", str_pattern[pattern]);
 		return 0;
