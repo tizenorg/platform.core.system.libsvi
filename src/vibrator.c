@@ -27,12 +27,11 @@
 #include <vconf.h>
 #include <haptic.h>
 
-#include "feedback.h"
-#include "feedback-internal.h"
-#include "feedback-str.h"
-#include "feedback-log.h"
-#include "xmlparser.h"
+#include "feedback-ids.h"
+#include "common.h"
+#include "log.h"
 #include "devices.h"
+#include "xmlparser.h"
 
 #define FEEDBACK_HAPTIC_DIR			FEEDBACK_DATA_DIR"/haptic"
 #define FEEDBACK_HAPTIC_TOUCH_DIR	FEEDBACK_HAPTIC_DIR"/touch"

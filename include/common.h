@@ -16,17 +16,15 @@
  */
 
 
-#ifndef __FEEDBACK_INTERNAL_H__
-#define __FEEDBACK_INTERNAL_H__
-
-#include "feedback-ids.h"
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @file feedback-internal.h
+ * @file common.h
  * @brief This file contains the common information
  */
 
@@ -37,8 +35,11 @@ extern "C" {
 
 extern int callstatus;
 
+extern const char *str_type[];
+extern const char *str_pattern[];
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif //__FEEDBACK_INTERNAL_H__
+#endif

@@ -21,9 +21,9 @@
 #include <glib.h>
 
 #include "xmlparser.h"
-#include "feedback-log.h"
+#include "log.h"
 
-static const xmlChar* data_str[] = {
+static const char* data_str[] = {
 	[XML_LABEL] = "label",
 	[XML_DATA]  = "data",
 };
@@ -57,7 +57,7 @@ static int xml_compare(xmlDocPtr doc, xmlNodePtr cur, const xmlChar* expr)
 	assert(expr);
 
 	for (node = cur->children; node != NULL; node = node->next) {
-		if (xmlStrcmp(node->name, data_str[XML_LABEL]))
+		if (xmlStrcmp(node->name, (const xmlChar*)data_str[XML_LABEL]))
 			continue;
 
 		key = xmlNodeListGetString(doc, node->children, 1);
@@ -105,7 +105,7 @@ struct xmlData *xml_parse(xmlDocPtr doc, xmlNodePtr cur)
 	xmlNodePtr node;
 	struct xmlData *data;
 	char *b64_data;
-	int len;
+	unsigned int len;
 
 	assert(doc);
 	assert(cur);
@@ -118,10 +118,10 @@ struct xmlData *xml_parse(xmlDocPtr doc, xmlNodePtr cur)
 
 	memset(data, 0, sizeof(struct xmlData));
 	for (node = cur->children; node != NULL; node = node->next) {
-		if (!xmlStrcmp(node->name, data_str[XML_LABEL])) {
+		if (!xmlStrcmp(node->name, (const xmlChar*)data_str[XML_LABEL])) {
 			data->label = (char*)xmlNodeListGetString(doc, node->children, 1);
 			FEEDBACK_LOG("label : %s", data->label);
-		} else if (!xmlStrcmp(node->name, data_str[XML_DATA])) {
+		} else if (!xmlStrcmp(node->name, (const xmlChar*)data_str[XML_DATA])) {
 			b64_data = (char *)xmlNodeListGetString(doc, node->children, 1);
 			if (b64_data != NULL) {
 				FEEDBACK_LOG("b64_data : %s", b64_data);

@@ -21,8 +21,8 @@
 #include <glib.h>
 
 #include "devices.h"
-#include "feedback-str.h"
-#include "feedback-log.h"
+#include "common.h"
+#include "log.h"
 
 #define DD_LIST_PREPEND(a, b)		\
 	a = g_list_prepend(a, b)
