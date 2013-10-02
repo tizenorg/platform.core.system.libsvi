@@ -169,12 +169,12 @@ static int get_haptic_level(feedback_pattern_e pattern)
 	else
 		level = vib_level;
 
-	FEEDBACK_LOG("Call status : %d, pattern : %s, level : %d", callstatus, str_pattern[pattern], level);
+	_D("Call status : %d, pattern : %s, level : %d", callstatus, str_pattern[pattern], level);
 	if (callstatus != VCONFKEY_CALL_OFF) {
 		// if call status is ON, vibration magnitude is 20%
 		level = (int)(level*0.2f);
 		level = (level < 1) ? 1 : level;
-		FEEDBACK_LOG("level changed : %d", level);
+		_D("level changed : %d", level);
 	}
 
 	level = level * 20;
@@ -200,13 +200,13 @@ static int get_xml_data(xmlDocPtr doc, feedback_pattern_e pattern, struct xmlDat
 
 	cur = xml_find(doc, (const xmlChar*)str_pattern[pattern]);
 	if (cur == NULL) {
-		FEEDBACK_ERROR("xml_find fail");
+		_E("xml_find fail");
 		return -1;
 	}
 
 	retData = xml_parse(doc, cur);
 	if (retData == NULL) {
-		FEEDBACK_ERROR("xml_parse fail");
+		_E("xml_parse fail");
 		return -1;
 	}
 
@@ -231,15 +231,15 @@ static int change_symlink(const char *sym_path, const char *new_path)
 
 	/* check symbolic link file existence */
 	if (stat(sym_path, &buf)) {
-		FEEDBACK_ERROR("file(%s) is not presents", sym_path);
+		_E("file(%s) is not presents", sym_path);
 		return -EPERM;
 	}
 
 	if (unlink(sym_path) < 0)
-		FEEDBACK_LOG("unlink(%s) : %s", sym_path, strerror(errno));
+		_D("unlink(%s) : %s", sym_path, strerror(errno));
 
 	if (symlink(new_path, sym_path) < 0) {
-		FEEDBACK_ERROR("symlink(%s) : %s", sym_path, strerror(errno));
+		_E("symlink(%s) : %s", sym_path, strerror(errno));
 		return -EPERM;
 	}
 
@@ -256,17 +256,17 @@ static int restore_default_file(feedback_pattern_e pattern)
 	cur_path = haptic_file[pattern];
 	// if there isn't cur_path, it already returns before calling this api
 	if (cur_path == NULL || strlen(cur_path) == 0) {
-		FEEDBACK_ERROR("Invalid parameter : cur_path(NULL)");
+		_E("Invalid parameter : cur_path(NULL)");
 		return -EPERM;
 	}
 
 	temp = strcat(default_path, FEEDBACK_ORIGIN_DATA_DIR);
 	strcat(temp, cur_path+strlen(FEEDBACK_DATA_DIR));
-	FEEDBACK_LOG("default_path : %s", default_path);
+	_D("default_path : %s", default_path);
 
 	ret = change_symlink(cur_path, default_path);
 	if (ret < 0) {
-		FEEDBACK_ERROR("change_symlink is failed");
+		_E("change_symlink is failed");
 		return -EPERM;
 	}
 
@@ -280,14 +280,14 @@ static void vibrator_init(void)
 	/* xml Init */
 	v_doc = xml_open(VIBRATION_XML);
 	if (v_doc == NULL) {
-		FEEDBACK_ERROR("xml_open(%s) fail", VIBRATION_XML);
+		_E("xml_open(%s) fail", VIBRATION_XML);
 		return;
 	}
 
 	/* Vibration Init */
 	ret = haptic_open(HAPTIC_DEVICE_ALL, &v_handle);
 	if (ret != HAPTIC_ERROR_NONE) {
-		FEEDBACK_ERROR("haptic_open(HAPTIC_DEVICE_ALL, &v_handle) ==> FAIL!! : %d", ret);
+		_E("haptic_open ==> FAIL!! : %d", ret);
 		xml_close(v_doc);
 		v_doc = NULL;
 		return;
@@ -295,15 +295,15 @@ static void vibrator_init(void)
 
 	/* check vibration status */
 	if (vconf_get_bool(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, &vibstatus) < 0)
-		FEEDBACK_ERROR("vconf_get_bool(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, &vibstatus) ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL ==> FAIL!!");
 
 	/* check vib_level */
 	if (vconf_get_int(VCONFKEY_SETAPPL_TOUCH_FEEDBACK_VIBRATION_LEVEL_INT, &vib_level) < 0)
-		FEEDBACK_ERROR("vconf_get_int(VCONFKEY_FEEDBACK_VIBRATION_LEVEL_INT, &vib_level) ==> FAIL!!");
+		_W("VCONFKEY_FEEDBACK_VIBRATION_LEVEL_INT ==> FAIL!!");
 
 	/* check noti_level */
 	if (vconf_get_int(VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT, &noti_level) < 0)
-		FEEDBACK_ERROR("vconf_get_int(VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT, &noti_level) ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT ==> FAIL!!");
 
 	/* add watch for status value */
 	vconf_notify_key_changed(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, feedback_vibstatus_cb, NULL);
@@ -323,7 +323,7 @@ static void vibrator_exit(void)
 	if (v_handle) {
 		ret = haptic_close(v_handle);
 		if (ret != HAPTIC_ERROR_NONE)
-			FEEDBACK_ERROR("haptic_close is failed : %d", ret);
+			_E("haptic_close is failed : %d", ret);
 		v_handle = NULL;
 	}
 
@@ -339,23 +339,23 @@ static int vibrator_play(feedback_pattern_e pattern)
 	struct xmlData *data;
 
 	if (!v_handle || !v_doc) {
-		FEEDBACK_ERROR("Not initialize");
+		_E("Not initialize");
 		return -EPERM;
 	}
 
 	if (vibstatus == 0 && !get_always_alert_case(pattern))  {
-		FEEDBACK_LOG("Vibration condition is OFF (vibstatus : %d)", vibstatus);
+		_D("Vibration condition is OFF (vibstatus : %d)", vibstatus);
 		return 0;
 	}
 
 	ret = get_xml_data(v_doc, pattern, &data);
 	if (ret < 0) {
-		FEEDBACK_ERROR("feedback_get_vibration_data fail");
+		_E("get_xml_data fail");
 		return -EPERM;
 	}
 
 	if (data->data == NULL) {
-		FEEDBACK_LOG("This case(%s) does not play vibration", str_pattern[pattern]);
+		_D("This case(%s) does not play vibration", str_pattern[pattern]);
 		release_xml_data(data);
 		return 0;
 	}
@@ -364,7 +364,7 @@ static int vibrator_play(feedback_pattern_e pattern)
 	ret = haptic_vibrate_buffer_with_detail(v_handle, data->data, HAPTIC_ITERATION_ONCE,
 					get_haptic_level(pattern), get_priority(pattern), NULL);
 	if (ret != HAPTIC_ERROR_NONE) {
-		FEEDBACK_ERROR("haptic_vibrate_buffer_with_detail is failed");
+		_E("haptic_vibrate_buffer_with_detail is failed");
 		release_xml_data(data);
 		return -EPERM;
 	}
@@ -382,14 +382,14 @@ static int vibrator_get_path(feedback_pattern_e pattern, char *buf, unsigned int
 
 	cur_path = haptic_file[pattern];
 	if (cur_path == NULL) {
-		FEEDBACK_ERROR("This pattern(%s) in vibrator type is not supported to play", str_pattern[pattern]);
+		_E("This pattern(%s) in vibrator type is not supported to play", str_pattern[pattern]);
 		snprintf(buf, buflen, "NULL");
 		return -ENOENT;
 	}
 
 	do {
 		if(readlink(cur_path, buf, buflen) < 0) {
-			FEEDBACK_ERROR("readlink is failed : %s", strerror(errno));
+			_E("readlink is failed : %s", strerror(errno));
 			return -EPERM;
 		}
 	} while(retry--);
@@ -405,19 +405,19 @@ static int vibrator_set_path(feedback_pattern_e pattern, char *path)
 	assert(path != NULL);
 
 	if (access(path, F_OK) != 0) {
-		FEEDBACK_ERROR("Invalid parameter : path does not exist");
+		_E("Invalid parameter : path does not exist");
 		return -ENOENT;
 	}
 
 	cur_path = haptic_file[pattern];
 	if (cur_path == NULL) {
-		FEEDBACK_ERROR("This pattern(%s) in vibrator type is not supported to play", str_pattern[pattern]);
+		_E("This pattern(%s) in vibrator type is not supported to play", str_pattern[pattern]);
 		return -ENOENT;
 	}
 
 	ret = change_symlink(cur_path, path);
 	if (ret < 0) {
-		FEEDBACK_ERROR("change_symlink is failed");
+		_E("change_symlink is failed");
 		return -EPERM;
 	}
 

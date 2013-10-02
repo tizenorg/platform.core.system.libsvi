@@ -177,15 +177,15 @@ static int change_symlink(const char *sym_path, const char *new_path)
 
 	/* check symbolic link file existence */
 	if (stat(sym_path, &buf)) {
-		FEEDBACK_ERROR("file(%s) is not presents", sym_path);
+		_E("file(%s) is not presents", sym_path);
 		return -EPERM;
 	}
 
 	if (unlink(sym_path) < 0)
-		FEEDBACK_LOG("unlink(%s) : %s", sym_path, strerror(errno));
+		_D("unlink(%s) : %s", sym_path, strerror(errno));
 
 	if (symlink(new_path, sym_path) < 0) {
-		FEEDBACK_ERROR("symlink(%s) : %s", sym_path, strerror(errno));
+		_E("symlink(%s) : %s", sym_path, strerror(errno));
 		return -EPERM;
 	}
 
@@ -202,17 +202,17 @@ static int restore_default_file(feedback_pattern_e pattern)
 	cur_path = sound_file[pattern];
 	/* if there isn't cur_path, it already returns before calling this api */
 	if (cur_path == NULL || strlen(cur_path) == 0) {
-		FEEDBACK_ERROR("Invalid parameter : cur_path(NULL)");
+		_E("Invalid parameter : cur_path(NULL)");
 		return -EPERM;
 	}
 
 	temp = strcat(default_path, FEEDBACK_ORIGIN_DATA_DIR);
 	strcat(temp, cur_path+strlen(FEEDBACK_DATA_DIR));
-	FEEDBACK_LOG("default_path : %s", default_path);
+	_D("default_path : %s", default_path);
 
 	ret = change_symlink(cur_path, default_path);
 	if (ret < 0) {
-		FEEDBACK_ERROR("change_symlink is failed");
+		_E("change_symlink is failed");
 		return -EPERM;
 	}
 
@@ -223,13 +223,13 @@ static void sound_init(void)
 {
 	/* Sound Init */
 	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) < 0)
-		FEEDBACK_ERROR("vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_SOUND_STATUS_BOOL ==> FAIL!!");
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, &touch_sndstatus) < 0)
-		FEEDBACK_ERROR("vconf_get_bool(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, &touch_sndstatus) ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL ==> FAIL!!");
 
 	if (vconf_get_int(VCONFKEY_SOUND_STATUS, &soundon) < 0)
-		FEEDBACK_ERROR("vconf_get_int(VCONFKEY_SOUND_STATUS, &soundon) ==> FAIL!!");
+		_W("VCONFKEY_SOUND_STATUS ==> FAIL!!");
 
 	/* add watch for status value */
 	vconf_notify_key_changed(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, feedback_sndstatus_cb, NULL);
@@ -251,42 +251,42 @@ static int sound_play(feedback_pattern_e pattern)
 	int retry = FEEDBACK_RETRY_CNT, ret;
 
 	if (sndstatus == 0 && !get_always_alert_case(pattern)) {
-		FEEDBACK_LOG("Sound condition is OFF (sndstatus : %d)", sndstatus);
+		_D("Sound condition is OFF (sndstatus : %d)", sndstatus);
 		return 0;
 	}
 
 	if (soundon == 1 && pattern >= FEEDBACK_PATTERN_TAP && pattern <= FEEDBACK_PATTERN_HW_HOLD) {
-		FEEDBACK_LOG("Touch feedback sound doesn't work during playing sound");
+		_D("Touch feedback sound doesn't work during playing sound");
 		return 0;
 	}
 
 	if (touch_sndstatus == 0 && pattern >= FEEDBACK_PATTERN_TAP && pattern <= FEEDBACK_PATTERN_HW_HOLD) {
-		FEEDBACK_LOG("Touch Sound condition is OFF and pattern is touch type (touch_sndstatus : %d, pattern : %s)", touch_sndstatus, str_pattern[pattern]);
+		_D("Touch Sound condition is OFF and pattern is touch type (touch_sndstatus : %d, pattern : %s)", touch_sndstatus, str_pattern[pattern]);
 		return 0;
 	}
 
 	if (sound_file[pattern] == NULL) {
-		FEEDBACK_LOG("This case(%s) does not play sound", str_pattern[pattern]);
+		_D("This case(%s) does not play sound", str_pattern[pattern]);
 		return 0;
 	}
 
 	if (stat(sound_file[pattern], &buf)) {
-		FEEDBACK_ERROR("%s is not presents", sound_file[pattern]);
+		_E("%s is not presents", sound_file[pattern]);
 		ret = restore_default_file(pattern);
 		if (ret < 0) {
-			FEEDBACK_ERROR("restore_default_file(%s) error", str_pattern[pattern]);
+			_E("restore_default_file(%s) error", str_pattern[pattern]);
 			return -EPERM;
 		}
-		FEEDBACK_LOG("%s is restored", sound_file[pattern]);
+		_D("%s is restored", sound_file[pattern]);
 	}
 
 	do {
 		ret = mm_sound_play_keysound(sound_file[pattern], get_volume_type(pattern));
 		if (ret == MM_ERROR_NONE) {
-			FEEDBACK_LOG("Play success! SND filename is %s", sound_file[pattern]);
+			_D("Play success! SND filename is %s", sound_file[pattern]);
 			return 0;
 		}
-		FEEDBACK_ERROR("mm_sound_play_keysound() returned error(%d)", ret);
+		_E("mm_sound_play_keysound() returned error(%d)", ret);
 	} while(retry--);
 
 	return -EPERM;
@@ -301,14 +301,14 @@ static int sound_get_path(feedback_pattern_e pattern, char *buf, unsigned int bu
 
 	cur_path = sound_file[pattern];
 	if (cur_path == NULL) {
-		FEEDBACK_ERROR("This pattern(%s) in sound type is not supported to play", str_pattern[pattern]);
+		_E("This pattern(%s) in sound type is not supported to play", str_pattern[pattern]);
 		snprintf(buf, buflen, "NULL");
 		return -ENOENT;
 	}
 
 	do {
 		if(readlink(cur_path, buf, buflen) < 0) {
-			FEEDBACK_ERROR("readlink is failed : %s", strerror(errno));
+			_E("readlink is failed : %s", strerror(errno));
 			return -EPERM;
 		}
 	} while(retry--);
@@ -324,19 +324,19 @@ static int sound_set_path(feedback_pattern_e pattern, char *path)
 	assert(path != NULL);
 
 	if (access(path, F_OK) != 0) {
-		FEEDBACK_ERROR("Invalid parameter : path does not exist");
+		_E("Invalid parameter : path does not exist");
 		return -ENOENT;
 	}
 
 	cur_path = sound_file[pattern];
 	if (cur_path == NULL) {
-		FEEDBACK_ERROR("This pattern(%s) in sound type is not supported to play", str_pattern[pattern]);
+		_E("This pattern(%s) in sound type is not supported to play", str_pattern[pattern]);
 		return -ENOENT;
 	}
 
 	ret = change_symlink(cur_path, path);
 	if (ret < 0) {
-		FEEDBACK_ERROR("change_symlink is failed");
+		_E("change_symlink is failed");
 		return -EPERM;
 	}
 
