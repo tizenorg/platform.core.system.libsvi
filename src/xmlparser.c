@@ -34,7 +34,7 @@ xmlDocPtr xml_open(const char *xml)
 
 	doc = xmlReadFile(xml, NULL, 0);
 	if (doc == NULL) {
-		FEEDBACK_ERROR("xmlReadFile fail");
+		_E("xmlReadFile fail");
 		return NULL;
 	}
 
@@ -83,7 +83,7 @@ xmlNodePtr xml_find(xmlDocPtr doc, const xmlChar* expr)
 
 	root = xmlDocGetRootElement(doc);
 	if (root == NULL) {
-		FEEDBACK_ERROR("xmlDocGetRootElement fail");
+		_E("xmlDocGetRootElement fail");
 		return NULL;
 	}
 
@@ -112,7 +112,7 @@ struct xmlData *xml_parse(xmlDocPtr doc, xmlNodePtr cur)
 
 	data = (struct xmlData*)malloc(sizeof(struct xmlData));
 	if (data == NULL) {
-		FEEDBACK_ERROR("out of memory");
+		_E("out of memory");
 		return NULL;
 	}
 
@@ -120,11 +120,11 @@ struct xmlData *xml_parse(xmlDocPtr doc, xmlNodePtr cur)
 	for (node = cur->children; node != NULL; node = node->next) {
 		if (!xmlStrcmp(node->name, (const xmlChar*)data_str[XML_LABEL])) {
 			data->label = (char*)xmlNodeListGetString(doc, node->children, 1);
-			FEEDBACK_LOG("label : %s", data->label);
+			_D("label : %s", data->label);
 		} else if (!xmlStrcmp(node->name, (const xmlChar*)data_str[XML_DATA])) {
 			b64_data = (char *)xmlNodeListGetString(doc, node->children, 1);
 			if (b64_data != NULL) {
-				FEEDBACK_LOG("b64_data : %s", b64_data);
+				_D("b64_data : %s", b64_data);
 				data->data = g_base64_decode(b64_data, &len);
 				xmlFree(b64_data);
 			}
@@ -143,7 +143,7 @@ int xml_save(xmlDocPtr doc, const char *path)
 
 	r = xmlSaveFile(path, doc);
 	if (r < 0) {
-		FEEDBACK_ERROR("xmlSaveFile fail");
+		_E("xmlSaveFile fail");
 		return -1;
 	}
 

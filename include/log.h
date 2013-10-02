@@ -24,11 +24,13 @@
 #ifdef FEATURE_FEEDBACK_DLOG
 	#define LOG_TAG "FEEDBACK"
 	#include <dlog.h>
-	#define FEEDBACK_LOG(fmt, args...)       SLOGD(fmt, ##args)
-	#define FEEDBACK_ERROR(fmt, args...)     SLOGE(fmt, ##args)
+	#define _D(fmt, args...)		SLOGD(fmt, ##args)
+	#define _W(fmt, args...)		SLOGW(fmt, ##args)
+	#define _E(fmt, args...)		SLOGE(fmt, ##args)
 #else
-	#define FEEDBACK_LOG(x, ...)
-	#define FEEDBACK_ERROR(x, ...)
+	#define _D(x, ...)
+	#define _W(x, ...)
+	#define _E(x, ...)
 #endif
 
 #endif //__LOG_H__

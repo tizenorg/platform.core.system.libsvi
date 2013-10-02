@@ -64,7 +64,7 @@ void devices_init(void)
 	const struct device_ops *dev;
 
 	DD_LIST_FOREACH(dev_head, elem, dev) {
-		FEEDBACK_LOG("[%s] initialize", str_type[dev->type]);
+		_D("[%s] initialize", str_type[dev->type]);
 		if (dev->init)
 			dev->init();
 	}
@@ -76,7 +76,7 @@ void devices_exit(void)
 	const struct device_ops *dev;
 
 	DD_LIST_FOREACH(dev_head, elem, dev) {
-		FEEDBACK_LOG("[%s] deinitialize", str_type[dev->type]);
+		_D("[%s] deinitialize", str_type[dev->type]);
 		if (dev->exit)
 			dev->exit();
 	}

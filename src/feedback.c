@@ -67,7 +67,7 @@ API int feedback_initialize()
 
 	/* check call status */
 	if (vconf_get_int(VCONFKEY_CALL_STATE, &callstatus) < 0)
-		FEEDBACK_ERROR("vconf_get_int(VCONFKEY_CALL_STATE, &callstatus) ==> FAIL!!");
+		_W("VCONFKEY_CALL_STATE ==> FAIL!!");
 
 	/* add watch for status value */
 	vconf_notify_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb, NULL);
@@ -97,24 +97,24 @@ API int feedback_play(feedback_pattern_e pattern)
 {
 	/* check initialize */
 	if (!binit) {
-		FEEDBACK_ERROR("Not initialized");
+		_E("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
 
 	if (pattern < FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
-		FEEDBACK_ERROR("Invalid parameter : pattern(%d)", pattern);
+		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
 	if (pattern == FEEDBACK_PATTERN_NONE) {
-		FEEDBACK_LOG("pattern is NONE");
+		_D("pattern is NONE");
 		return FEEDBACK_ERROR_NONE;
 	}
 
 	/* in case of call connected or connecting */
 	if (callstatus != VCONFKEY_CALL_OFF) {
 		pattern = get_alert_on_call_key(pattern);
-		FEEDBACK_LOG("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
+		_D("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
 	}
 
 	/* play all device */
@@ -130,29 +130,29 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 
 	/* check initialize */
 	if (!binit) {
-		FEEDBACK_ERROR("Not initialized");
+		_E("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
 
 	if (type <= FEEDBACK_TYPE_NONE || type >= FEEDBACK_TYPE_END) {
-		FEEDBACK_ERROR("Invalid parameter : type(%d)", type);
+		_E("Invalid parameter : type(%d)", type);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
 	if (pattern < FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
-		FEEDBACK_ERROR("Invalid parameter : pattern(%d)", pattern);
+		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
 	if (pattern == FEEDBACK_PATTERN_NONE) {
-		FEEDBACK_LOG("pattern is NONE");
+		_D("pattern is NONE");
 		return FEEDBACK_ERROR_NONE;
 	}
 
 	/* in case of call connected or connecting */
 	if (callstatus != VCONFKEY_CALL_OFF) {
 		pattern = get_alert_on_call_key(pattern);
-		FEEDBACK_LOG("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
+		_D("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
 	}
 
 	/* play proper device */
@@ -160,7 +160,7 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 	if (dev) {
 		err = dev->play(pattern);
 		if (err < 0)
-			FEEDBACK_ERROR("fail to play sound");
+			_E("fail to play sound");
 	}
 
 	return FEEDBACK_ERROR_NONE;
@@ -173,17 +173,17 @@ API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e patt
 	int err;
 
 	if (path == NULL) {
-		FEEDBACK_ERROR("Invalid parameter : path(NULL)");
+		_E("Invalid parameter : path(NULL)");
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
 	if (type <= FEEDBACK_TYPE_NONE || type >= FEEDBACK_TYPE_END) {
-		FEEDBACK_ERROR("Invalid parameter : type(%d)", type);
+		_E("Invalid parameter : type(%d)", type);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
 	if (pattern <= FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
-		FEEDBACK_ERROR("Invalid parameter : pattern(%d)", pattern);
+		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
@@ -205,17 +205,17 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 	int err;
 
 	if (path == NULL) {
-		FEEDBACK_ERROR("Invalid parameter : path(NULL)");
+		_E("Invalid parameter : path(NULL)");
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
 	if (type <= FEEDBACK_TYPE_NONE || type >= FEEDBACK_TYPE_END) {
-		FEEDBACK_ERROR("Invalid parameter : type(%d)", type);
+		_E("Invalid parameter : type(%d)", type);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
 	if (pattern <= FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
-		FEEDBACK_ERROR("Invalid parameter : pattern(%d)", pattern);
+		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
