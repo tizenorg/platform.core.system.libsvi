@@ -1,0 +1,9 @@
+Code-Review+1: Patrick McCarty <patrick.mccarty@linux.intel.com>
+Code-Review+2: william douglas <william.douglas@intel.com>
+Code-Review+1: Lukasz Stelmach <l.stelmach@samsung.com>
+Verified+1: Lukasz Stelmach <l.stelmach@samsung.com>
+Submitted-by: Jiyoung Yun <jy910.yun@samsung.com>
+Submitted-at: Wed, 02 Oct 2013 04:10:03 -0700
+Reviewed-on: https://review.tizen.org/gerrit/10408
+Project: platform/core/system/libsvi
+Branch: refs/heads/tizen
