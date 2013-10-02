@@ -23,9 +23,8 @@
 #include <vconf.h>
 
 #include "feedback.h"
-#include "feedback-internal.h"
-#include "feedback-str.h"
-#include "feedback-log.h"
+#include "common.h"
+#include "log.h"
 #include "devices.h"
 
 #ifndef API
@@ -63,8 +62,6 @@ static feedback_pattern_e get_alert_on_call_key(feedback_pattern_e pattern)
 
 API int feedback_initialize()
 {
-	int err = -1;
-
 	if (binit)
 		return FEEDBACK_ERROR_NONE;
 

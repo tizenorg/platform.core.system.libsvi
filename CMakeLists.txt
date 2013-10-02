@@ -15,7 +15,8 @@ SET(SRCS
 	src/sound.c
 	src/vibrator.c
 	src/xmlparser.c
-	src/feedback.c)
+	src/feedback.c
+	src/str.c)
 
 SET(HEADERS
 	SLP_FEEDBACK_PG.h

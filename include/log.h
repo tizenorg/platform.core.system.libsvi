@@ -16,8 +16,8 @@
  */
 
 
-#ifndef __FEEDBACK_LOG_H__
-#define __FEEDBACK_LOG_H__
+#ifndef __LOG_H__
+#define __LOG_H__
 
 #define FEATURE_FEEDBACK_DLOG
 
@@ -31,4 +31,4 @@
 	#define FEEDBACK_ERROR(x, ...)
 #endif
 
-#endif //__FEEDBACK_LOG_H__
+#endif //__LOG_H__

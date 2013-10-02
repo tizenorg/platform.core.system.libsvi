@@ -21,7 +21,7 @@
 #include <glib.h>
 
 #include "xmlparser.h"
-#include "feedback-log.h"
+#include "log.h"
 
 static const xmlChar* data_str[] = {
 	[XML_LABEL] = "label",

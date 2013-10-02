@@ -27,10 +27,9 @@
 #include <vconf.h>
 #include <mm_sound_private.h>
 
-#include "feedback.h"
-#include "feedback-internal.h"
-#include "feedback-str.h"
-#include "feedback-log.h"
+#include "feedback-ids.h"
+#include "common.h"
+#include "log.h"
 #include "devices.h"
 
 #define FEEDBACK_SOUND_DIR			FEEDBACK_DATA_DIR"/sound"

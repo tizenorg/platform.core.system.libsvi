@@ -16,10 +16,9 @@
  */
 
 
-#ifndef __FEEDBACK_STR_H__
-#define __FEEDBACK_STR_H__
+#include <stdio.h>
 
-static const char *str_type[] =
+const char *str_type[] =
 {
 	"FEEDBACK_TYPE_NONE",
 	"FEEDBACK_TYPE_SOUND",
@@ -27,7 +26,7 @@ static const char *str_type[] =
 	"FEEDBACK_TYPE_END",
 };
 
-static const char *str_pattern[] =
+const char *str_pattern[] =
 {
 	"FEEDBACK_PATTERN_TAP",
 	"FEEDBACK_PATTERN_SIP",
@@ -80,5 +79,3 @@ static const char *str_pattern[] =
 	"FEEDBACK_PATTERN_SLIDER_SWEEP",
 	"FEEDBACK_PATTERN_VOLUME_KEY",
 };
-
-#endif //__FEEDBACK_STR_H__
