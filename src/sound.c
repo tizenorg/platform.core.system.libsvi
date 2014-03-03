@@ -17,6 +17,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
@@ -32,11 +33,13 @@
 #include "log.h"
 #include "devices.h"
 
-#define FEEDBACK_SOUND_DIR			FEEDBACK_DATA_DIR"/sound"
-#define FEEDBACK_SOUND_TOUCH_DIR	FEEDBACK_SOUND_DIR"/touch"
-#define FEEDBACK_SOUND_OPER_DIR		FEEDBACK_SOUND_DIR"/operation"
+#define FEEDBACK_SOUND_DIR		FEEDBACK_DATA_DIR"/sound"
+#define FEEDBACK_SOUND_TOUCH_DIR	"touch"
+#define FEEDBACK_SOUND_OPER_DIR		"operation"
+#define SCRIPT_INIT_LINK_WAV		FEEDBACK_ORIGIN_DATA_DIR"/init_wav_link.sh"
+#define MAX_SOUND_FILE			50
 
-static const char* sound_file[] = {
+static const char* sound_file_default[] = {
 	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : GENERAL */
 	FEEDBACK_SOUND_TOUCH_DIR"/touch.wav",
 	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : TEXT_NUMERIC_INPUT */
@@ -85,6 +88,7 @@ static const char* sound_file[] = {
 	NULL,
 	/* NOTIFICATION : ALARM : TIMER ALERT ON CALL */
 	NULL,
+
 	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) */
 	FEEDBACK_SOUND_OPER_DIR"/call_connect.wav",
 	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) ALERT ON CALL */
@@ -123,6 +127,95 @@ static const char* sound_file[] = {
 	FEEDBACK_SOUND_OPER_DIR"/slider_sweep.wav",
 	/* OPERATION : VOLUME KEY */
 	FEEDBACK_SOUND_OPER_DIR"/volume_control.wav",
+};
+static char* sound_file[] = {
+	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : GENERAL */
+	NULL,
+	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : TEXT_NUMERIC_INPUT */
+	NULL,
+	NULL,
+	NULL,
+	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : DAILER */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	/* TOUCH : H/W OR SOFT TOUCH : HOLD(TAP & HOLD) */
+	NULL,
+	/* TOUCH : H/W OR SOFT TOUCH : MULTI TAP */
+	NULL,
+	/* TOUCH : H/W OR SOFT TOUCH : TAP */
+	NULL,
+	/* TOUCH : H/W OR SOFT TOUCH : TAP & HOLD */
+	NULL,
+
+	/* NOTIFICATION : INCOMING : MESSAGE */
+	NULL,
+	/* NOTIFICATION : INCOMING : MESSAGE ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : INCOMING : EMAIL */
+	NULL,
+	/* NOTIFICATION : INCOMING : EMAIL ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : ALARM : WAKEUP */
+	NULL,
+	/* NOTIFICATION : ALARM : WAKEUP ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : ALARM : SCHEDULE */
+	NULL,
+	/* NOTIFICATION : ALARM : SCHEDULE ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : ALARM : TIMER */
+	NULL,
+	/* NOTIFICATION : ALARM : TIMER ALERT ON CALL */
+	NULL,
+
+	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) */
+	NULL,
+	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) ALERT ON CALL */
+	NULL,
+
+	/* OPERATION : POWER ON/OFF */
+	NULL,
+	NULL,
+	/* OPERATION : CHARGECONN */
+	NULL,
+	/* OPERATION : CHARGECONN ALERT ON CALL */
+	NULL,
+	/* OPERATION : FULLCHAREGED */
+	NULL,
+	/* OPERATION : FULLCHAREGED ALERT ON CALL */
+	NULL,
+	/* OPERATION : LOW BATTERY */
+	NULL,
+	/* OPERATION : LOW BATTERY ALERT ON CALL */
+	NULL,
+	/* OPERATION : LOCK/UNLOCK */
+	NULL,
+	NULL,
+	/* OPERATION : CALL CONNECT/ DISCONNECT */
+	NULL,
+	NULL,
+	/* OPERATION : MINUTE MINDER */
+	NULL,
+	/* OPERATION : VIBRATION */
+	NULL,
+	/* OPERATION : CAMERA SHUTTER / SCREEN CAPTURE */
+	NULL,
+	/* OPERATION : LIST RE-ORDER */
+	NULL,
+	/* OPERATION : LIST SLIDER */
+	NULL,
+	/* OPERATION : VOLUME KEY */
+	NULL,
 };
 
 static int sndstatus;
@@ -219,8 +312,37 @@ static int restore_default_file(feedback_pattern_e pattern)
 	return 0;
 }
 
+static void link_init(void)
+{
+	struct stat sts;
+	int i,ret;
+	int directory = 0;
+	char default_path[PATH_MAX] = {0,};
+
+	/* Check if the directory exists; if not, create it and initialize it */
+	ret = stat(FEEDBACK_DATA_DIR, &sts);
+	if (ret == -1 && errno == ENOENT){
+		directory = 1;
+	}
+
+	/* init of sound array and link*/
+	strcat(default_path, FEEDBACK_ORIGIN_DATA_DIR);
+	for( i = 0 ; i< MAX_SOUND_FILE ; i++){
+		if ( sound_file_default[i] !=  NULL ){
+			sound_file[i] = strdup(tzplatform_mkpath3(TZ_USER_SHARE,"feedback/sound",sound_file_default[i]));
+			if (directory == 1){
+				if (symlink(default_path,sound_file[i]) < 0){
+					_W("change_symlink is failed");
+				}
+			}
+		}
+	}
+}
+
 static void sound_init(void)
 {
+	link_init();
+
 	/* Sound Init */
 	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) < 0)
 		_W("VCONFKEY_SETAPPL_SOUND_STATUS_BOOL ==> FAIL!!");
@@ -239,10 +361,17 @@ static void sound_init(void)
 
 static void sound_exit(void)
 {
+
+	int i;
+
 	/* remove watch */
 	vconf_ignore_key_changed(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, feedback_sndstatus_cb);
 	vconf_ignore_key_changed(VCONFKEY_SOUND_STATUS, feedback_soundon_cb);
 	vconf_ignore_key_changed(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, feedback_touch_sndstatus_cb);
+
+	for(i = 0 ; i< MAX_SOUND_FILE ; i++){
+		free(sound_file[i]);
+	}
 }
 
 static int sound_play(feedback_pattern_e pattern)

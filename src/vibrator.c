@@ -34,12 +34,14 @@
 #include "xmlparser.h"
 
 #define FEEDBACK_HAPTIC_DIR			FEEDBACK_DATA_DIR"/haptic"
-#define FEEDBACK_HAPTIC_TOUCH_DIR	FEEDBACK_HAPTIC_DIR"/touch"
-#define FEEDBACK_HAPTIC_OPER_DIR	FEEDBACK_HAPTIC_DIR"/operation"
-#define FEEDBACK_HAPTIC_NOTI_DIR	FEEDBACK_HAPTIC_DIR"/notification"
-#define FEEDBACK_HAPTIC_DEFAULT_DIR FEEDBACK_HAPTIC_DIR"/default"
+#define FEEDBACK_HAPTIC_TOUCH_DIR	"touch"
+#define FEEDBACK_HAPTIC_OPER_DIR	"operation"
+#define FEEDBACK_HAPTIC_NOTI_DIR	"notification"
+#define FEEDBACK_HAPTIC_DEFAULT_DIR 	"default"
+#define SCRIPT_INIT_LINK_HAPTIC		FEEDBACK_ORIGIN_DATA_DIR"/init_wav_link.sh"
+#define MAX_HAPTIC_FILE			50
 
-static const char* haptic_file[] = {
+static const char* haptic_file_default[] = {
 	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : GENERAL */
 	NULL,
 	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : TEXT_NUMERIC_INPUT */
@@ -118,6 +120,95 @@ static const char* haptic_file[] = {
 	FEEDBACK_HAPTIC_DEFAULT_DIR"/Basic_call.tht",
 	/* OPERATION : VIBRATION */
 	FEEDBACK_HAPTIC_DEFAULT_DIR"/Basic_call.tht",
+	/* OPERATION : CAMERA SHUTTER / SCREEN CAPTURE */
+	NULL,
+	/* OPERATION : LIST RE-ORDER */
+	NULL,
+	/* OPERATION : LIST SLIDER */
+	NULL,
+	/* OPERATION : VOLUME KEY */
+	NULL,
+};
+
+static char* haptic_file[] = {
+	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : GENERAL */
+	NULL,
+	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : TEXT_NUMERIC_INPUT */
+	NULL,
+	NULL,
+	NULL,
+	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : DAILER */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	/* TOUCH : H/W OR SOFT TOUCH : HOLD(TAP & HOLD) */
+	NULL,
+	/* TOUCH : H/W OR SOFT TOUCH : MULTI TAP */
+	NULL,
+	/* TOUCH : H/W OR SOFT TOUCH : TAP */
+	NULL,
+	/* TOUCH : H/W OR SOFT TOUCH : TAP & HOLD */
+	NULL,
+
+	/* NOTIFICATION : INCOMING : MESSAGE */
+	NULL,
+	/* NOTIFICATION : INCOMING : MESSAGE ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : INCOMING : EMAIL */
+	NULL,
+	/* NOTIFICATION : INCOMING : EMAIL ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : ALARM : WAKEUP */
+	NULL,
+	/* NOTIFICATION : ALARM : WAKEUP ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : ALARM : SCHEDULE */
+	NULL,
+	/* NOTIFICATION : ALARM : SCHEDULE ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : ALARM : TIMER */
+	NULL,
+	/* NOTIFICATION : ALARM : TIMER ALERT ON CALL */
+	NULL,
+	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) */
+	NULL,
+	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) ALERT ON CALL */
+	NULL,
+
+	/* OPERATION : POWER ON/OFF */
+	NULL,
+	NULL,
+	/* OPERATION : CHARGECONN */
+	NULL,
+	/* OPERATION : CHARGECONN ALERT ON CALL */
+	NULL,
+	/* OPERATION : FULLCHAREGED */
+	NULL,
+	/* OPERATION : FULLCHAREGED ALERT ON CALL */
+	NULL,
+	/* OPERATION : LOW BATTERY */
+	NULL,
+	/* OPERATION : LOW BATTERY ALERT ON CALL */
+	NULL,
+	/* OPERATION : LOCK/UNLOCK */
+	NULL,
+	NULL,
+	/* OPERATION : CALL CONNECT/ DISCONNECT */
+	NULL,
+	NULL,
+	/* OPERATION : MINUTE MINDER */
+	NULL,
+	/* OPERATION : VIBRATION */
+	NULL,
 	/* OPERATION : CAMERA SHUTTER / SCREEN CAPTURE */
 	NULL,
 	/* OPERATION : LIST RE-ORDER */
@@ -273,9 +364,39 @@ static int restore_default_file(feedback_pattern_e pattern)
 	return 0;
 }
 
+
+static void link_init(void)
+{
+	struct stat sts;
+	int i,ret;
+	int directory = 0;
+	char default_path[PATH_MAX] = {0,};
+
+	/* Check if the directory exists; if not, create it and initialize it */
+	ret = stat(FEEDBACK_DATA_DIR, &sts);
+	if (ret == -1 && errno == ENOENT){
+		directory = 1;
+	}
+
+	/* init of haptic array and link*/
+	strcat(default_path, FEEDBACK_ORIGIN_DATA_DIR);
+	for( i = 0 ; i< MAX_HAPTIC_FILE ; i++){
+		if ( haptic_file_default[i] != NULL ){
+			haptic_file[i] = strdup(tzplatform_mkpath3(TZ_USER_SHARE,"feedback/haptic",haptic_file_default[i]));
+			if (directory == 1){
+				if (symlink(default_path,haptic_file[i]) < 0){
+					_W("change_symlink is failed");
+				}
+			}
+		}
+	}
+}
+
 static void vibrator_init(void)
 {
 	int ret;
+
+	link_init();
 
 	/* xml Init */
 	v_doc = xml_open(VIBRATION_XML);
@@ -313,7 +434,7 @@ static void vibrator_init(void)
 
 static void vibrator_exit(void)
 {
-	int ret;
+	int ret,i;
 
 	/* remove watch */
 	vconf_ignore_key_changed(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, feedback_vibstatus_cb);
@@ -330,6 +451,13 @@ static void vibrator_exit(void)
 	if (v_doc) {
 		xml_close(v_doc);
 		v_doc = NULL;
+	}
+
+	for( i = 0 ; i< MAX_HAPTIC_FILE ; i++)
+	{
+		if ( haptic_file[i] !=  NULL ) {
+			free (haptic_file[i]);
+		}
 	}
 }
 

@@ -18,6 +18,7 @@ BuildRequires:  pkgconfig(haptic)
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(capi-base-common)
+BuildRequires:  pkgconfig(libtzplatform-config)
 
 %description
 Feedback library for playing sound, vibration and led
@@ -69,11 +70,6 @@ make
 rm -rf %{buildroot}
 %make_install
 
-mkdir -p %{buildroot}/opt/usr/share/feedback/sound/touch
-mkdir -p %{buildroot}/opt/usr/share/feedback/sound/operation
-mkdir -p %{buildroot}/opt/usr/share/feedback/haptic/default
-mkdir -p %{buildroot}/opt/usr/share/feedback/haptic/touch
-
 mkdir -p %{buildroot}%{_datadir}/license
 cp LICENSE.APLv2 %{buildroot}%{_datadir}/license/%{name}
 
@@ -82,38 +78,6 @@ cp LICENSE.APLv2 %{buildroot}%{_datadir}/license/%{name}
 %post -n libsvi -p /sbin/ldconfig
 
 %postun -n libsvi -p /sbin/ldconfig
-
-%post -n svi-data
-ln -s %{_datadir}/feedback/sound/touch/key0.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key1.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key2.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key3.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key4.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key5.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key6.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key7.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key8.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/key9.wav            /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/keyasterisk.wav     /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/keysharp.wav        /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/sip.wav             /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/sip_backspace.wav   /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/touch/touch.wav           /opt/usr/share/feedback/sound/touch
-ln -s %{_datadir}/feedback/sound/operation/call_connect.wav         /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/call_disconnect.wav      /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/charger_connection.wav   /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/fully_charged.wav        /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/list_reorder.wav         /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/lock.wav                 /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/low_battery.wav          /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/minute_minder.wav        /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/power_on.wav             /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/shutter.wav              /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/slider_sweep.wav         /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/unlock.wav               /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/sound/operation/volume_control.wav       /opt/usr/share/feedback/sound/operation
-ln -s %{_datadir}/feedback/haptic/default/Basic_call.tht             /opt/usr/share/feedback/haptic/default
-ln -s %{_datadir}/feedback/haptic/touch/touch.tht                    /opt/usr/share/feedback/haptic/touch
 
 %postun -p /sbin/ldconfig
 
@@ -150,8 +114,3 @@ rm -rf /opt/usr/share/feedback/
 %manifest %{name}.manifest
 %defattr(644,root,root,-)
 %{_datadir}/feedback/*
-%defattr(666,app,app,-)
-%dir /opt/usr/share/feedback/sound/touch
-%dir /opt/usr/share/feedback/sound/operation
-%dir /opt/usr/share/feedback/haptic/default
-%dir /opt/usr/share/feedback/haptic/touch

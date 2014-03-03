@@ -32,7 +32,7 @@ SET(SVI_HEADERS
 SET(SVI_SRCS
 	src/svi.c)
 
-SET(DEPENDENTS "vconf haptic mm-keysound dlog libxml-2.0 glib-2.0")
+SET(DEPENDENTS "vconf haptic mm-keysound dlog libxml-2.0 glib-2.0 libtzplatform-config")
 SET(PC_DEPENDENTS "capi-base-common")
 
 SET(PC_NAME ${PROJECT_NAME})
