@@ -1,8 +1,5 @@
 <manifest>
-	<define>
-		<domain name="svi-data"/>
-	</define>
 	<request>
-		<domain name="svi-data"/>
+		<domain name="_"/>
 	</request>
 </manifest>
