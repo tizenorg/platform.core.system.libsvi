@@ -83,7 +83,6 @@ cp LICENSE.APLv2 %{buildroot}%{_datadir}/license/%{name}
 
 %postun -n svi-data
 rm -rf %{_datadir}/feedback/
-rm -rf /opt/usr/share/feedback/
 
 %files
 %manifest %{name}.manifest
