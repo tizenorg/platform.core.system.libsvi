@@ -3,12 +3,12 @@ Summary:    Feedback library
 Version:    0.1.3
 Release:    0
 Group:      System/Libraries
-License:    Apache License, Version 2.0
+License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
-Source1:	libsvi.manifest
-source2:	libfeedback.manifest
-source3:	svi-data.manifest
-Requires(post): /sbin/ldconfig
+Source1:        libsvi.manifest
+Source2:        libfeedback.manifest
+Source3:        svi-data.manifest
+Requires(post):   /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(dlog)
@@ -23,7 +23,6 @@ BuildRequires:  pkgconfig(libtzplatform-config)
 %description
 Feedback library for playing sound, vibration and led
 
-
 %package -n libfeedback-devel
 Summary:    Feedback library for (devel)
 Group:      Development/Libraries
@@ -33,28 +32,27 @@ Requires:   libfeedback = %{version}-%{release}
 Feedback library for playing sound, vibration and led (devel)
 
 %package -n libsvi
-Summary:	SVI library
-Group:		Development/Libraries
-Requires:	libfeedback = %{version}-%{release}
+Summary:    SVI library
+Group:      Development/Libraries
+Requires:   libfeedback = %{version}-%{release}
 
 %description -n libsvi
-SVI library
+SVI library package
 
 %package -n libsvi-devel
-Summary:	SVI library for (devel)
-Group:		Development/Libraries
-Requires:	libsvi = %{version}-%{release}
+Summary:    SVI library for (devel)
+Group:      Development/Libraries
+Requires:   libsvi = %{version}-%{release}
 
 %description -n libsvi-devel
-SVI library (devel)
+SVI library (devel) package
 
 %package -n svi-data
-Summary: 	svi resource package
-Group:		Development/Libraries
+Summary:    SVI resource
+Group:      Development/Libraries
 
 %description -n svi-data
-svi resource package
-
+SVI resource package
 
 %prep
 %setup -q 
@@ -64,7 +62,7 @@ cp %{SOURCE1} .
 cp %{SOURCE2} .
 cp %{SOURCE3} .
 %cmake .
-make
+%__make
 
 %install
 rm -rf %{buildroot}
@@ -104,7 +102,7 @@ rm -rf %{_datadir}/feedback/
 
 %files -n libsvi-devel
 %manifest %{name}.manifest
-%defattr(-,root,root-)
+%defattr(-,root,root,-)
 %{_includedir}/svi/*.h
 %{_libdir}/libsvi.so
 %{_libdir}/pkgconfig/svi.pc
