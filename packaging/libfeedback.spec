@@ -34,6 +34,7 @@ Feedback library for playing sound and vibration (devel)
 %package -n svi-data
 Summary: 	svi resource package
 Group:		Development/Libraries
+Requires:	findutils
 
 %description -n svi-data
 svi resource package
