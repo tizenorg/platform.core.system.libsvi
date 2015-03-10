@@ -50,12 +50,15 @@ enum haptic_iteration
 	HAPTIC_ITERATION_INFINITE = 256,
 };
 
-#define VIBRATION_XML				"/usr/share/feedback/vibration.xml"
+#define VIBRATION_XML               "/usr/share/feedback/vibration.xml"
 
-#define METHOD_OPEN					"OpenDevice"
-#define METHOD_CLOSE				"CloseDevice"
-#define METHOD_VIBRATE_BUFFER		"VibrateBuffer"
-#define METHOD_STOP					"StopDevice"
+#define METHOD_OPEN                 "OpenDevice"
+#define METHOD_CLOSE                "CloseDevice"
+#define METHOD_VIBRATE_BUFFER       "VibrateBuffer"
+#define METHOD_VIBRATE_MONOTONE     "VibrateMonotone"
+#define METHOD_STOP                 "StopDevice"
+
+#define DEFAULT_DURATION            100
 
 static int vibstatus;
 static int vib_level;
@@ -90,6 +93,31 @@ static int haptic_close(unsigned int handle)
 	return dbus_method_sync(DEVICED_BUS_NAME, DEVICED_PATH_HAPTIC,
 			DEVICED_INTERFACE_HAPTIC, METHOD_CLOSE,
 			"u", arr);
+}
+
+static int haptic_vibrate_monotone(unsigned int handle,
+								int duration,
+								int feedback,
+								int priority)
+{
+	char *arr[4];
+	char buf_handle[32];
+	char buf_duration[32];
+	char buf_feedback[32];
+	char buf_priority[32];
+
+	snprintf(buf_handle, sizeof(buf_handle), "%u", handle);
+	arr[0] = buf_handle;
+	snprintf(buf_duration, sizeof(buf_duration), "%d", duration);
+	arr[1] = buf_duration;
+	snprintf(buf_feedback, sizeof(buf_feedback), "%d", feedback);
+	arr[2] = buf_feedback;
+	snprintf(buf_priority, sizeof(buf_priority), "%d", priority);
+	arr[3] = buf_priority;
+
+	return dbus_method_sync(DEVICED_BUS_NAME, DEVICED_PATH_HAPTIC,
+			DEVICED_INTERFACE_HAPTIC, METHOD_VIBRATE_MONOTONE,
+			"uiii", arr);
 }
 
 static int haptic_vibrate_buffer(unsigned int handle,
@@ -367,10 +395,7 @@ static void vibrator_exit(void)
 
 static int vibrator_play(feedback_pattern_e pattern)
 {
-	int ret, size;
-	struct xmlData *data;
-	char *path;
-	unsigned char *buf;
+	int ret;
 
 	if (!v_handle || !v_doc) {
 		_E("Not initialize");
@@ -392,54 +417,13 @@ static int vibrator_play(feedback_pattern_e pattern)
 		return 0;
 	}
 
-	/* if there is a file path user defined */
-	path = haptic_file[pattern];
-	if (*path) {
-		buf = convert_file_to_buffer(path, &size);
-		if (!buf) {
-			_E("convert_file_to_buffer is failed");
-			return -EPERM;
-		}
-
-		ret = haptic_vibrate_buffer(v_handle, buf, size, HAPTIC_ITERATION_ONCE,
-				get_haptic_level(pattern), get_priority(pattern));
-		if (ret < 0) {
-			_E("haptic_vibrate_buffer is failed");
-			free(buf);
-			return -EPERM;
-		}
-
-		free(buf);
-		return 0;
-	}
-
-	ret = get_xml_data(v_doc, pattern, &data);
-	if (ret == -ENOENT) {
-		_D("No vibration case(%s)", str_pattern[pattern]);
-		return 0;
-	}
-
+	ret = haptic_vibrate_monotone(v_handle, DEFAULT_DURATION,
+			get_haptic_level(pattern), get_priority(pattern));
 	if (ret < 0) {
-		_E("get_xml_data fail");
+		_E("haptic_vibrate_monotone is failed");
 		return -EPERM;
 	}
 
-	if (data->data == NULL) {
-		_D("No vibration case(%s)", str_pattern[pattern]);
-		release_xml_data(data);
-		return 0;
-	}
-
-	/* play haptic buffer */
-	ret = haptic_vibrate_buffer(v_handle, (unsigned char*)data->data, data->size, HAPTIC_ITERATION_ONCE,
-					get_haptic_level(pattern), get_priority(pattern));
-	if (ret < 0) {
-		_E("haptic_vibrate_buffer is failed");
-		release_xml_data(data);
-		return -EPERM;
-	}
-
-	release_xml_data(data);
 	return 0;
 }
 
