@@ -18,22 +18,10 @@
 
 
 #include <stdio.h>
-#include <glib.h>
 
 #include "devices.h"
-#include "common.h"
 #include "log.h"
 
-#define DD_LIST_PREPEND(a, b)		\
-	a = g_list_prepend(a, b)
-#define DD_LIST_APPEND(a, b)		\
-	a = g_list_append(a, b)
-#define DD_LIST_REMOVE(a, b)		\
-	a = g_list_remove(a, b)
-#define DD_LIST_FOREACH(head, elem, node)	\
-	for (elem = head; elem && ((node = elem->data) != NULL); elem = elem->next, node = NULL)
-
-typedef GList dd_list;
 static dd_list *dev_head;
 
 void add_device(const struct device_ops *dev)
@@ -64,7 +52,7 @@ void devices_init(void)
 	const struct device_ops *dev;
 
 	DD_LIST_FOREACH(dev_head, elem, dev) {
-		_D("[%s] initialize", str_type[dev->type]);
+		_D("[%s] initialize", dev->name);
 		if (dev->init)
 			dev->init();
 	}
@@ -76,30 +64,45 @@ void devices_exit(void)
 	const struct device_ops *dev;
 
 	DD_LIST_FOREACH(dev_head, elem, dev) {
-		_D("[%s] deinitialize", str_type[dev->type]);
+		_D("[%s] deinitialize", dev->name);
 		if (dev->exit)
 			dev->exit();
 	}
 }
 
-void devices_play(int pattern)
+int devices_play(int pattern)
 {
 	dd_list *elem;
 	const struct device_ops *dev;
+	int ret, prev = -EPERM;
 
 	DD_LIST_FOREACH(dev_head, elem, dev) {
-		if (dev->play)
-			dev->play(pattern);
+		if (dev->play) {
+			ret = dev->play(pattern);
+			if ((prev < 0 && ret == 0) ||
+			    (prev == 0 && ret < 0))
+				prev = 0;
+			else if ((prev < 0 && ret == -ENOTSUP) ||
+			         (prev == -ENOTSUP && ret < 0))
+				prev = -ENOTSUP;
+			else
+				prev = ret;
+		}
 	}
+
+	return prev;
 }
 
-void devices_stop(void)
+int devices_stop(void)
 {
 	dd_list *elem;
 	const struct device_ops *dev;
+	int ret = -ENOTSUP;
 
 	DD_LIST_FOREACH(dev_head, elem, dev) {
 		if (dev->stop)
-			dev->stop();
+			ret = dev->stop();
 	}
+
+	return ret;
 }

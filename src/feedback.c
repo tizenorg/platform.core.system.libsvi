@@ -20,123 +20,94 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
-#include <vconf.h>
 
 #include "feedback.h"
-#include "common.h"
-#include "log.h"
+#include "profiles.h"
 #include "devices.h"
+#include "log.h"
 
 #ifndef API
 #define API __attribute__ ((visibility("default")))
 #endif
 
-int callstatus;
-int alert_callstatus;
-
 static bool binit;
 
-static void feedback_callstatus_cb(keynode_t *key, void* data)
-{
-	callstatus = vconf_keynode_get_int(key);
-}
-
-static void feedback_alertstatus_cb(keynode_t *key, void* data)
-{
-	alert_callstatus = vconf_keynode_get_int(key);
-}
-
-static feedback_pattern_e get_alert_on_call_key(feedback_pattern_e pattern)
-{
-	switch(pattern) {
-	case FEEDBACK_PATTERN_MESSAGE:
-	case FEEDBACK_PATTERN_EMAIL:
-	case FEEDBACK_PATTERN_WAKEUP:
-	case FEEDBACK_PATTERN_SCHEDULE:
-	case FEEDBACK_PATTERN_TIMER:
-	case FEEDBACK_PATTERN_GENERAL:
-	case FEEDBACK_PATTERN_CHARGERCONN:
-	case FEEDBACK_PATTERN_CHARGING_ERROR:
-	case FEEDBACK_PATTERN_FULLCHARGED:
-	case FEEDBACK_PATTERN_LOWBATT:
-		return (feedback_pattern_e)(pattern+1);
-	default:
-		break;
-	}
-
-	return pattern;
-}
-
-static void __DESTRUCTOR__ module_exit(void)
-{
-	if (!binit)
-		return;
-
-	vconf_ignore_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb);
-	vconf_ignore_key_changed(VCONFKEY_CISSAPPL_ALERT_ON_CALL_INT, feedback_alertstatus_cb);
-
-	/* deinitialize device */
-	devices_exit();
-
-	binit = false;
-}
-
-API int feedback_initialize()
+API int feedback_initialize(void)
 {
 	if (binit)
 		return FEEDBACK_ERROR_NONE;
 
-	/* check call status */
-	if (vconf_get_int(VCONFKEY_CALL_STATE, &callstatus) < 0)
-		_W("VCONFKEY_CALL_STATE ==> FAIL!!");
-
-
-	/* alert option on call */
-	if (vconf_get_int(VCONFKEY_CISSAPPL_ALERT_ON_CALL_INT, &alert_callstatus) < 0)
-		_W("VCONFKEY_CISSAPPL_ON_CALL_INT ==> FAIL!!");
-
-	/* add watch for status value */
-	vconf_notify_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_CISSAPPL_ALERT_ON_CALL_INT, feedback_alertstatus_cb, NULL);
+	if (!profile) {
+		_E("there is no valid profile module.");
+		return FEEDBACK_ERROR_NOT_SUPPORTED;
+	}
 
 	/* initialize device */
 	devices_init();
+
+	/* initialize profile feature */
+	if (profile->init)
+		profile->init();
 
 	binit = true;
 	return FEEDBACK_ERROR_NONE;
 }
 
-API int feedback_deinitialize()
+API int feedback_deinitialize(void)
 {
+	if (!binit)
+		return FEEDBACK_ERROR_NOT_INITIALIZED;
+
+	/* deinitialize device */
+	devices_exit();
+
+	/* deinitialize profile feature */
+	if (profile->exit)
+		profile->exit();
+
+	binit = false;
 	return FEEDBACK_ERROR_NONE;
 }
 
 API int feedback_play(feedback_pattern_e pattern)
 {
+	int err;
+	bool result;
+	int switched;
+
 	/* check initialize */
 	if (!binit) {
 		_E("Not initialized");
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
 
-	if (pattern < FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
+	if (pattern <= FEEDBACK_PATTERN_NONE ||
+	    pattern >= profile->max_pattern) {
 		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (pattern == FEEDBACK_PATTERN_NONE) {
-		_D("pattern is NONE");
-		return FEEDBACK_ERROR_NONE;
-	}
-
-	/* in case of call connected or connecting */
-	if (callstatus != VCONFKEY_CALL_OFF) {
-		pattern = get_alert_on_call_key(pattern);
-		_D("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
+	/* if you need to switch pattern */
+	if (profile->get_switched_pattern) {
+		result = profile->get_switched_pattern(pattern, &switched);
+		if (result) {
+			_W("pattern is changed : (%s) -> (%s)",
+					profile->str_pattern[pattern], profile->str_pattern[switched]);
+			pattern = switched;
+		}
 	}
 
 	/* play all device */
-	devices_play(pattern);
+	err = devices_play(pattern);
+	/**
+	 * devices_play() returns error even if all devices are failed.
+	 * It means if to play anything is successful,
+	 * this function regards as success.
+	 */
+	if (err == -ENOTSUP)
+		return FEEDBACK_ERROR_NOT_SUPPORTED;
+	else if (err < 0)
+		return FEEDBACK_ERROR_OPERATION_FAILED;
 
 	return FEEDBACK_ERROR_NONE;
 }
@@ -145,6 +116,8 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 {
 	const struct device_ops *dev;
 	int err;
+	bool result;
+	int switched;
 
 	/* check initialize */
 	if (!binit) {
@@ -152,84 +125,50 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
 
-	if (type <= FEEDBACK_TYPE_NONE || type >= FEEDBACK_TYPE_END) {
+	if (type <= FEEDBACK_TYPE_NONE ||
+	    type >= profile->max_type) {
 		_E("Invalid parameter : type(%d)", type);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (pattern < FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
+	if (pattern <= FEEDBACK_PATTERN_NONE ||
+	    pattern >= profile->max_pattern) {
 		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (pattern == FEEDBACK_PATTERN_NONE) {
-		_D("pattern is NONE");
-		return FEEDBACK_ERROR_NONE;
+	/* if you need to switch pattern */
+	if (profile->get_switched_pattern) {
+		result = profile->get_switched_pattern(pattern, &switched);
+		if (result) {
+			_W("pattern is changed : (%s) -> (%s)",
+					profile->str_pattern[pattern], profile->str_pattern[switched]);
+			pattern = switched;
+		}
 	}
-
-	/* in case of call connected or connecting */
-	if (callstatus != VCONFKEY_CALL_OFF) {
-		pattern = get_alert_on_call_key(pattern);
-		_D("Call status is connected or connecting. pattern changed : %s", str_pattern[pattern]);
-	}
-
-	/* should play led regardless of sound or vibration */
-	dev = find_device(FEEDBACK_TYPE_LED);
-	if (dev) {
-		err = dev->play(pattern);
-		if (err < 0)
-			_E("feedback_play_led is failed");
-	}
-
-	if (type == FEEDBACK_TYPE_LED)
-		return FEEDBACK_ERROR_NONE;
 
 	/* play proper device */
 	dev = find_device(type);
-	if (dev) {
-		err = dev->play(pattern);
-		if (err < 0)
-			_E("fail to play sound");
+	if (!dev) {
+		_E("Not supported device : type(%s)", profile->str_type[type]);
+		return FEEDBACK_ERROR_NOT_SUPPORTED;
 	}
+
+	err = dev->play(pattern);
+	if (err == -ENOTSUP)
+		return FEEDBACK_ERROR_NOT_SUPPORTED;
+	else if (err == -ECOMM)
+		return FEEDBACK_ERROR_PERMISSION_DENIED;
+	else
+		return FEEDBACK_ERROR_OPERATION_FAILED;
 
 	return FEEDBACK_ERROR_NONE;
 }
 
-API int feedback_play_type_by_name(char *type, char *pattern)
-{
-	feedback_type_e etype;
-	feedback_pattern_e epattern;
-
-	if (!type || !pattern) {
-		_E("Invalid parameter : type(%x), pattern(%x)", type, pattern);
-		return FEEDBACK_ERROR_INVALID_PARAMETER;
-	}
-
-	for (etype = FEEDBACK_TYPE_NONE; etype < FEEDBACK_TYPE_END; ++etype) {
-		if (!strncmp(type, str_type[etype], strlen(type)))
-			break;
-	}
-
-	if (etype == FEEDBACK_TYPE_END) {
-		_E("Invalid parameter : type(%s)", type);
-		return FEEDBACK_ERROR_INVALID_PARAMETER;
-	}
-
-	for (epattern = 0; epattern < FEEDBACK_PATTERN_END; ++epattern) {
-		if (!strncmp(pattern, str_pattern[epattern], strlen(pattern)))
-			break;
-	}
-
-	if (epattern == FEEDBACK_PATTERN_END) {
-		_E("Invalid parameter : pattern(%d)", pattern);
-		return FEEDBACK_ERROR_INVALID_PARAMETER;
-	}
-
-	return feedback_play_type(etype, epattern);
-}
-
 API int feedback_stop(void)
 {
+	int err;
+
 	/* check initialize */
 	if (!binit) {
 		_E("Not initialized");
@@ -237,9 +176,110 @@ API int feedback_stop(void)
 	}
 
 	/* stop all device */
-	devices_stop();
+	err = devices_stop();
+	if (err == -ENOTSUP)
+		return FEEDBACK_ERROR_NOT_SUPPORTED;
+	else if (err == -ECOMM)
+		return FEEDBACK_ERROR_PERMISSION_DENIED;
+	else
+		return FEEDBACK_ERROR_OPERATION_FAILED;
 
 	return FEEDBACK_ERROR_NONE;
+}
+
+API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e pattern, bool *status)
+{
+	const struct device_ops *dev;
+	bool supported;
+	int err;
+	bool result;
+	int switched;
+
+	/* check initialize */
+	if (!binit) {
+		_E("Not initialized");
+		return FEEDBACK_ERROR_NOT_INITIALIZED;
+	}
+
+	if (!status) {
+		_E("Invalid parameter : status(NULL)");
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	if (type <= FEEDBACK_TYPE_NONE ||
+	    type >= profile->max_type) {
+		_E("Invalid parameter : type(%d)", type);
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	if (pattern <= FEEDBACK_PATTERN_NONE ||
+	    pattern >= profile->max_pattern) {
+		_E("Invalid parameter : pattern(%d)", pattern);
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	/* if you need to switch pattern */
+	if (profile->get_switched_pattern) {
+		result = profile->get_switched_pattern(pattern, &switched);
+		if (result) {
+			_W("pattern is changed : (%s) -> (%s)",
+					profile->str_pattern[pattern], profile->str_pattern[switched]);
+			pattern = switched;
+		}
+	}
+
+	/* play proper device */
+	dev = find_device(type);
+	if (!dev) {
+		_E("Not supported device : type(%s)", profile->str_type[type]);
+		return FEEDBACK_ERROR_NOT_SUPPORTED;
+	}
+
+	err = dev->is_supported(pattern, &supported);
+	if (err < 0) {
+		_E("fail to invoke is_supported() : pattern(%s)", profile->str_pattern[pattern]);
+		return FEEDBACK_ERROR_OPERATION_FAILED;
+	}
+
+	return FEEDBACK_ERROR_NONE;
+}
+
+/* Internal APIs */
+API int feedback_play_type_by_name(char *type, char *pattern)
+{
+	feedback_type_e etype;
+	feedback_pattern_e epattern;
+	int type_max;
+	int pattern_max;
+
+	if (!type || !pattern) {
+		_E("Invalid parameter : type(%x), pattern(%x)", type, pattern);
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	type_max = profile->max_type;
+	for (etype = 0; etype < type_max; ++etype) {
+		if (!strncmp(type, profile->str_type[etype], strlen(type)))
+			break;
+	}
+
+	if (etype == type_max) {
+		_E("Invalid parameter : type(%s)", type);
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	pattern_max = profile->max_pattern;
+	for (epattern = 0; epattern < pattern_max; ++epattern) {
+		if (!strncmp(pattern, profile->str_pattern[epattern], strlen(pattern)))
+			break;
+	}
+
+	if (epattern == pattern_max) {
+		_E("Invalid parameter : pattern(%d)", pattern);
+		return FEEDBACK_ERROR_INVALID_PARAMETER;
+	}
+
+	return feedback_play_type(etype, epattern);
 }
 
 API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e pattern, char** path)
@@ -253,12 +293,14 @@ API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e patt
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (type <= FEEDBACK_TYPE_NONE || type >= FEEDBACK_TYPE_END) {
+	if (type <= FEEDBACK_TYPE_NONE ||
+	    type >= profile->max_type) {
 		_E("Invalid parameter : type(%d)", type);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (pattern <= FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
+	if (pattern <= FEEDBACK_PATTERN_NONE ||
+	    pattern >= profile->max_pattern) {
 		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
@@ -280,12 +322,14 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 	const struct device_ops *dev;
 	int err;
 
-	if (type <= FEEDBACK_TYPE_NONE || type >= FEEDBACK_TYPE_END) {
+	if (type <= FEEDBACK_TYPE_NONE ||
+	    type >= profile->max_type) {
 		_E("Invalid parameter : type(%d)", type);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (pattern <= FEEDBACK_PATTERN_NONE || pattern >= FEEDBACK_PATTERN_END) {
+	if (pattern <= FEEDBACK_PATTERN_NONE ||
+	    pattern >= profile->max_pattern) {
 		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}

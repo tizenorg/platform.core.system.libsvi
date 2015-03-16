@@ -27,18 +27,8 @@
  *   \#include <feedback.h>
  *
  * @section CAPI_SYSTEM_FEEDBACK_MODULE_OVERVIEW Overview
- * The FEEDBACK API provides functions to play sound or vibration associated with properties.
- * @section CAPI_SYSTEM_FEEDBACK_MODULE_FEATURE Related Features
- * This API is related with the following features:\n
- * - http://developer.samsung.com/tizen/feature/haptic\n
- *
- * It is recommended to design feature related codes in your application for reliability.\n
- *
- * You can check if a devrice supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
- *
- * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
- *
- * More details on featuring your application can be found from <a href="../org.tizen.mobile.native.appprogramming/html/ide_sdk_tools/feature_element.htm"><b>Feature Element</b>.</a>
+ * The FEEDBACK API is responsible for playing simple sound and vibration.
+ * It plays sound using mm-sound library and vibration with system framework.
  *
  */
 

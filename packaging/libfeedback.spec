@@ -53,11 +53,13 @@ cp %{SOURCE2} .
 %define ARCH emulator
 %endif
 
-%cmake \
 %if "%{?tizen_profile_name}" == "wearable"
-	-DMICRO_DD=YES \
+%define PROFILE wearable
+%else if "%{?tizen_profile_name}" == "mobile"
+%define PROFILE mobile
 %endif
-	. -DCMAKE_INSTALL_PREFIX=%{_prefix} -DARCH=%{ARCH}
+
+%cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DARCH=%{ARCH} -DPROFILE=%{PROFILE}
 make
 
 %install
