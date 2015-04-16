@@ -29,19 +29,12 @@ IF(NOT "${PROFILE}" STREQUAL "common")
 		${FEEDBACK_PROFILE_PATH}/include/feedback-ids-${PROFILE}.h)
 ENDIF()
 
-SET(DEPENDENTS "vconf mm-keysound dlog libxml-2.0 glib-2.0 dbus-1")
-SET(PC_DEPENDENTS "capi-base-common")
-
-SET(PC_NAME ${PROJECT_NAME})
-SET(PC_REQUIRED ${PC_DEPENDENTS})
-SET(PC_LDFLAGS -l${PROJECT_NAME})
-
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${FEEDBACK_PROFILE_PATH}/include)
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(pkgs REQUIRED ${DEPENDENTS})
+pkg_check_modules(pkgs REQUIRED vconf mm-keysound dlog libxml-2.0 glib-2.0 dbus-1)
 
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
