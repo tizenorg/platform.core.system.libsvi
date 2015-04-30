@@ -22,7 +22,8 @@ SET(SRCS
 
 SET(HEADERS
 	include/feedback.h
-	include/feedback-ids.h)
+	include/feedback-ids.h
+	include/feedback-internal.h)
 
 IF(NOT "${PROFILE}" STREQUAL "common")
 	SET(HEADERS ${HEADERS}
