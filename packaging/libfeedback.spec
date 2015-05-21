@@ -47,19 +47,13 @@ export CFLAGS+=" -DTIZEN_ENGINEER_MODE"
 cp %{SOURCE1} .
 cp %{SOURCE2} .
 
-%ifarch %{arm}
-%define ARCH arm
-%else
-%define ARCH emulator
-%endif
-
 %if "%{?tizen_profile_name}" == "wearable"
 %define PROFILE wearable
 %else if "%{?tizen_profile_name}" == "mobile"
 %define PROFILE mobile
 %endif
 
-%cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DARCH=%{ARCH} -DPROFILE=%{PROFILE}
+%cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DPROFILE=%{PROFILE}
 make
 
 %install

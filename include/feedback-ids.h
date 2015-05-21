@@ -38,6 +38,8 @@ typedef enum
 	FEEDBACK_TYPE_SOUND,
 	FEEDBACK_TYPE_VIBRATION,
 	FEEDBACK_TYPE_END,
+	/* TODO Will be removed */
+	FEEDBACK_TYPE_LED = FEEDBACK_TYPE_NONE,
 } feedback_type_e;
 
 /**
