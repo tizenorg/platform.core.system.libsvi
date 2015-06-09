@@ -17,6 +17,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
@@ -27,6 +28,7 @@
 
 #include "feedback-ids.h"
 #include "profiles.h"
+#include "parser.h"
 #include "devices.h"
 #include "log.h"
 #include "dbus.h"
@@ -46,20 +48,37 @@ enum haptic_iteration
 	HAPTIC_ITERATION_INFINITE = 256,
 };
 
-#define VIBRATION_XML               "/usr/share/feedback/vibration.xml"
+#define VIBRATION_CONF_FILE         "/usr/share/feedback/vibration.conf"
 
 #define METHOD_OPEN                 "OpenDevice"
 #define METHOD_CLOSE                "CloseDevice"
 #define METHOD_VIBRATE_MONOTONE     "VibrateMonotone"
+#define METHOD_VIBRATE_BUFFER       "VibrateBuffer"
 #define METHOD_STOP                 "StopDevice"
 
 #define DEFAULT_DURATION            100
 
 static int vibstatus;
-
 static unsigned int v_handle;
+static struct feedback_config_info vib_info = {
+	.name = "Vibration",
+};
 
-static char haptic_file[FEEDBACK_PATTERN_END][NAME_MAX];
+static char *get_data(feedback_pattern_e pattern)
+{
+	char *data;
+
+	if (pattern <= FEEDBACK_PATTERN_NONE ||
+	    pattern >= profile->max_pattern)
+		return NULL;
+
+	if (vib_info.data[pattern].changed)
+		data = vib_info.data[pattern].changed;
+	else
+		data = vib_info.data[pattern].origin;
+
+	return data;
+}
 
 inline int is_vibration_mode(void)
 {
@@ -90,6 +109,37 @@ static int haptic_close(unsigned int handle)
 	return dbus_method_sync(DEVICED_BUS_NAME, DEVICED_PATH_HAPTIC,
 			DEVICED_INTERFACE_HAPTIC, METHOD_CLOSE,
 			"u", arr);
+}
+
+static int haptic_vibrate_buffer(unsigned int handle,
+								const unsigned char *buffer,
+								int size,
+								int iteration,
+								int feedback,
+								int priority)
+{
+	char *arr[6];
+	char buf_handle[32];
+	char buf_iteration[32];
+	char buf_feedback[32];
+	char buf_priority[32];
+	struct dbus_byte bytes;
+
+	snprintf(buf_handle, sizeof(buf_handle), "%u", handle);
+	arr[0] = buf_handle;
+	bytes.size = size;
+	bytes.data = buffer;
+	arr[2] = (char *)&bytes;
+	snprintf(buf_iteration, sizeof(buf_iteration), "%d", iteration);
+	arr[3] = buf_iteration;
+	snprintf(buf_feedback, sizeof(buf_feedback), "%d", feedback);
+	arr[4] = buf_feedback;
+	snprintf(buf_priority, sizeof(buf_priority), "%d", priority);
+	arr[5] = buf_priority;
+
+	return dbus_method_sync(DEVICED_BUS_NAME, DEVICED_PATH_HAPTIC,
+			DEVICED_INTERFACE_HAPTIC, METHOD_VIBRATE_BUFFER,
+			"uayiii", arr);
 }
 
 static int haptic_vibrate_monotone(unsigned int handle,
@@ -130,6 +180,53 @@ static int haptic_vibrate_stop(unsigned int handle)
 			"u", arr);
 }
 
+static unsigned char *convert_file_to_buffer(const char *file_name, int *size)
+{
+	FILE *pf;
+	long file_size;
+	unsigned char *pdata = NULL;
+
+	if (!file_name)
+		return NULL;
+
+	/* Get File Stream Pointer */
+	pf = fopen(file_name, "rb");
+	if (!pf) {
+		_E("fopen failed : %s", strerror(errno));
+		return NULL;
+	}
+
+	if (fseek(pf, 0, SEEK_END))
+		goto error;
+
+	file_size = ftell(pf);
+	if (fseek(pf, 0, SEEK_SET))
+		goto error;
+
+	if (file_size < 0)
+		goto error;
+
+	pdata = (unsigned char *)malloc(file_size);
+	if (!pdata)
+		goto error;
+
+	if (fread(pdata, 1, file_size, pf) != file_size)
+		goto err_free;
+
+	fclose(pf);
+	*size = file_size;
+	return pdata;
+
+err_free:
+	free(pdata);
+
+error:
+	fclose(pf);
+
+	_E("failed to convert file to buffer (%s)", strerror(errno));
+	return NULL;
+}
+
 static int get_priority(feedback_pattern_e pattern)
 {
 	if (pattern >= FEEDBACK_PATTERN_TAP && pattern <= FEEDBACK_PATTERN_HW_HOLD)
@@ -152,6 +249,9 @@ static void vibrator_init(void)
 
 	/* Set vibration handle */
 	v_handle = (unsigned int)ret;
+
+	/* get vibration data */
+	feedback_load_config(VIBRATION_CONF_FILE, &vib_info);
 }
 
 static void vibrator_exit(void)
@@ -164,10 +264,17 @@ static void vibrator_exit(void)
 			_E("haptic_close is failed : %d", ret);
 		v_handle = 0;
 	}
+
+	/* free vibration data */
+	feedback_free_config(&vib_info);
 }
 
 static int vibrator_play(feedback_pattern_e pattern)
 {
+	struct stat buf;
+	char *data;
+	unsigned char *pbuf;
+	int size;
 	int ret;
 	int level;
 
@@ -203,15 +310,36 @@ static int vibrator_play(feedback_pattern_e pattern)
 	else
 		level = DEFAULT_VIB_LEVEL * HAPTIC_FEEDBACK_STEP;
 
-	ret = haptic_vibrate_monotone(v_handle, DEFAULT_DURATION,
-			level, get_priority(pattern));
+	/* get vibration data */
+	data = get_data(pattern);
+	if (!data) {
+		_E("Not supported vibration pattern");
+		return -ENOTSUP;
+	}
+
+	/* if it has a file path */
+	if (!stat(data, &buf)) {
+		pbuf = convert_file_to_buffer(data, &size);
+		if (!pbuf) {
+			_E("fail to convert file to buffer");
+			return -EPERM;
+		}
+
+		ret = haptic_vibrate_buffer(v_handle, pbuf, size,
+				HAPTIC_ITERATION_ONCE,
+				level, get_priority(pattern));
+	} else
+		ret = haptic_vibrate_monotone(v_handle, DEFAULT_DURATION,
+				level, get_priority(pattern));
+
 	if (ret < 0) {
-		_E("haptic_vibrate_monotone is failed");
+		_E("fail to play vibration");
 		if (ret == -ECOMM)
 			return ret;
 		return -EPERM;
 	}
 
+	_D("Play success! Data is %s", data);
 	return 0;
 }
 
@@ -243,6 +371,9 @@ static int vibrator_stop(void)
 
 static int vibrator_is_supported(int pattern, bool *supported)
 {
+	char *data;
+	bool ret = true;
+
 	if (!supported) {
 		_E("Invalid parameter : supported(NULL)");
 		return -EINVAL;
@@ -259,32 +390,41 @@ static int vibrator_is_supported(int pattern, bool *supported)
 		return 0;
 	}
 
-	*supported = true;
+	/* get vibration data */
+	data = get_data(pattern);
+	if (!data) {
+		_E("Not supported vibration pattern");
+		ret = false;
+	}
+
+	*supported = ret;
 	return 0;
 }
 
 static int vibrator_get_path(feedback_pattern_e pattern, char *buf, unsigned int buflen)
 {
-	const char *cur_path;
+	char *data;
+	int ret = 0;
 
-	assert(buf != NULL && buflen > 0);
+	if (!buf || buflen <= 0)
+		return -EINVAL;
 
-	cur_path = haptic_file[pattern];
-	if (*cur_path) {
+	/* get vibration data */
+	data = get_data(pattern);
+	if (!data) {
 		_E("This pattern(%s) in vibrator type is not supported to play",
 				profile->str_pattern[pattern]);
-		snprintf(buf, buflen, "NULL");
-		return -ENOENT;
+		data = "NULL";
+		ret = -ENOENT;
 	}
 
-	snprintf(buf, buflen, "%s", cur_path);
-	return 0;
+	snprintf(buf, buflen, "%s", data);
+	return ret;
 }
 
 static int vibrator_set_path(feedback_pattern_e pattern, char *path)
 {
 	struct stat buf;
-	char *ppath;
 
 	/*
 	 * check the path is valid
@@ -295,13 +435,14 @@ static int vibrator_set_path(feedback_pattern_e pattern, char *path)
 		return -errno;
 	}
 
-	ppath = haptic_file[pattern];
+	if (vib_info.data[pattern].changed) {
+		free(vib_info.data[pattern].changed);
+		vib_info.data[pattern].changed = NULL;
+	}
 
 	/* if path is NULL, this pattern set to default file */
 	if (path)
-		snprintf(ppath, NAME_MAX, "%s", path);
-	else
-		memset(ppath, 0, NAME_MAX);
+		vib_info.data[pattern].changed = strdup(path);
 
 	_D("The file of pattern(%s) is changed to [%s]",
 			profile->str_pattern[pattern], path);

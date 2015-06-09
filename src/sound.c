@@ -17,6 +17,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
@@ -31,9 +32,9 @@
 #include "profiles.h"
 #include "devices.h"
 #include "log.h"
-#include "xmlparser.h"
+#include "parser.h"
 
-#define SOUND_XML					"/usr/share/feedback/sound.xml"
+#define SOUND_CONF_FILE "/usr/share/feedback/sound.conf"
 
 /* Temporary keys */
 #ifndef VCONFKEY_SETAPPL_BUTTON_SOUNDS_BOOL
@@ -43,10 +44,25 @@
 static int sndstatus;
 static int touch_sndstatus;
 static int keytone_sndstatus;
+static struct feedback_config_info sound_info = {
+	.name = "Sound",
+};
 
-static xmlDocPtr v_doc;
+static char *get_data(feedback_pattern_e pattern)
+{
+	char *data;
 
-static char sound_file[FEEDBACK_PATTERN_END][PATH_MAX];
+	if (pattern <= FEEDBACK_PATTERN_NONE ||
+	    pattern >= profile->max_pattern)
+		return NULL;
+
+	if (sound_info.data[pattern].changed)
+		data = sound_info.data[pattern].changed;
+	else
+		data = sound_info.data[pattern].origin;
+
+	return data;
+}
 
 inline int is_sound_mode(void)
 {
@@ -73,43 +89,10 @@ static void feedback_keytone_sndstatus_cb(keynode_t *key, void* data)
 	keytone_sndstatus = vconf_keynode_get_bool(key);
 }
 
-static int get_xml_data(xmlDocPtr doc, feedback_pattern_e pattern, struct xmlData **data)
-{
-	xmlNodePtr cur;
-	struct xmlData *retData;
-
-	cur = xml_find(doc, SOUND_STR,
-			(const xmlChar*)profile->str_pattern[pattern]);
-	/* This pattern does not have sound file to play */
-	if (cur == NULL)
-		return -ENOENT;
-
-	retData = xml_parse(doc, cur);
-	if (retData == NULL) {
-		_E("xml_parse fail");
-		return -EPERM;
-	}
-
-	*data = retData;
-	return 0;
-}
-
-static void release_xml_data(struct xmlData *data)
-{
-	if (data == NULL)
-		return;
-
-	xml_free(data);
-}
-
 static void sound_init(void)
 {
-	/* xml Init */
-	v_doc = xml_open(SOUND_XML);
-	if (v_doc == NULL) {
-		_E("xml_open(%s) fail", SOUND_XML);
-		return;
-	}
+	/* get sound data */
+	feedback_load_config(SOUND_CONF_FILE, &sound_info);
 
 	/* check sound status */
 	if (vconf_get_bool(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, &touch_sndstatus) < 0)
@@ -129,10 +112,8 @@ static void sound_exit(void)
 	vconf_ignore_key_changed(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, feedback_touch_sndstatus_cb);
 	vconf_ignore_key_changed(VCONFKEY_SETAPPL_BUTTON_SOUNDS_BOOL, feedback_keytone_sndstatus_cb);
 
-	if (v_doc) {
-		xml_close(v_doc);
-		v_doc = NULL;
-	}
+	/* free sound data */
+	feedback_free_config(&sound_info);
 }
 
 static int sound_play(feedback_pattern_e pattern)
@@ -140,13 +121,7 @@ static int sound_play(feedback_pattern_e pattern)
 	struct stat buf;
 	int retry = FEEDBACK_RETRY_CNT, ret;
 	char *path;
-	struct xmlData *data = NULL;
 	int level;
-
-	if (!v_doc) {
-		_E("Not initialize");
-		return -EPERM;
-	}
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) < 0) {
 		_D("fail to get sound status, will work as turning off");
@@ -165,33 +140,10 @@ static int sound_play(feedback_pattern_e pattern)
 		return 0;
 	}
 
-	/* check whether there is a user defined file */
-	path = sound_file[pattern];
-
-	/* if not */
-	if (!(*path)) {
-		ret = get_xml_data(v_doc, pattern, &data);
-		if (ret == -ENOENT) {
-			_E("No sound case(%s)", profile->str_pattern[pattern]);
-			return -ENOTSUP;
-		}
-
-		if (ret < 0) {
-			_E("get_xml_data fail");
-			return -EPERM;
-		}
-
-		if (!data->data) {
-			_E("No sound case(%s)", profile->str_pattern[pattern]);
-			release_xml_data(data);
-			return -ENOTSUP;
-		}
-
-		path = data->data;
-	}
-
-	if (stat(path, &buf)) {
-		_E("%s is not presents", path);
+	/* get sound file path */
+	path = get_data(pattern);
+	if (!path || stat(path, &buf)) {
+		_E("Not supported sound pattern");
 		return -ENOTSUP;
 	}
 
@@ -205,13 +157,11 @@ static int sound_play(feedback_pattern_e pattern)
 		ret = mm_sound_play_keysound(path, level);
 		if (ret == MM_ERROR_NONE) {
 			_D("Play success! SND filename is %s", path);
-			release_xml_data(data);
 			return 0;
 		}
 		_E("mm_sound_play_keysound() returned error(%d)", ret);
 	} while(retry--);
 
-	release_xml_data(data);
 	return -EPERM;
 }
 
@@ -219,59 +169,21 @@ static int sound_is_supported(feedback_pattern_e pattern, bool *supported)
 {
 	struct stat buf;
 	char *path;
-	struct xmlData *data = NULL;
-	int ret;
+	bool ret = true;
 
 	if (!supported) {
 		_E("Invalid parameter : supported(NULL)");
 		return -EINVAL;
 	}
 
-	if (!v_doc) {
-		_E("Not initialize");
-		return -EPERM;
-	}
-
-	/* check whether there is a user defined file */
-	path = sound_file[pattern];
-
-	/* if not */
-	if (!(*path)) {
-		ret = get_xml_data(v_doc, pattern, &data);
-		if (ret == -ENOENT) {
-			_D("No sound case(%s)", profile->str_pattern[pattern]);
-			goto out;
-		}
-
-		if (ret < 0) {
-			_E("get_xml_data fail");
-			return -EPERM;
-		}
-
-		if (!data->data) {
-			_D("No sound case(%s)", profile->str_pattern[pattern]);
-			goto out;
-		}
-
-		path = data->data;
-	}
-
-	if (stat(path, &buf)) {
+	/* get sound file path */
+	path = get_data(pattern);
+	if (!path || stat(path, &buf)) {
 		_E("%s is not presents", path);
-		release_xml_data(data);
-		return -ENOENT;
+		ret = false;
 	}
 
-	release_xml_data(data);
-
-	*supported = true;
-	return 0;
-
-out:
-	if (data)
-		release_xml_data(data);
-
-	*supported = false;
+	*supported = ret;
 	return 0;
 }
 
@@ -279,18 +191,12 @@ static int sound_get_path(feedback_pattern_e pattern, char *buf, unsigned int bu
 {
 	char *cur_path;
 	int ret = 0;
-	struct xmlData *data = NULL;
 
 	if (!buf || buflen <= 0)
 		return -EINVAL;
 
-	cur_path = sound_file[pattern];
-	if (!cur_path) {
-		ret = get_xml_data(v_doc, pattern, &data);
-		if (ret >= 0 && data && data->data)
-			cur_path = (char*)data->data;
-	}
-
+	/* get sound file path */
+	cur_path = get_data(pattern);
 	if (!cur_path) {
 		_E("This pattern(%s) in sound type is not supported to play",
 				profile->str_pattern[pattern]);
@@ -299,14 +205,12 @@ static int sound_get_path(feedback_pattern_e pattern, char *buf, unsigned int bu
 	}
 
 	snprintf(buf, buflen, "%s", cur_path);
-	release_xml_data(data);
-	return 0;
+	return ret;
 }
 
 static int sound_set_path(feedback_pattern_e pattern, char *path)
 {
 	struct stat buf;
-	char *ppath;
 
 	/*
 	 * check the path is valid
@@ -317,13 +221,14 @@ static int sound_set_path(feedback_pattern_e pattern, char *path)
 		return -errno;
 	}
 
-	ppath = sound_file[pattern];
+	if (sound_info.data[pattern].changed) {
+		free(sound_info.data[pattern].changed);
+		sound_info.data[pattern].changed = NULL;
+	}
 
 	/* if path is NULL, this pattern set to default file */
 	if (path)
-		snprintf(ppath, NAME_MAX, "%s", path);
-	else
-		memset(ppath, 0, NAME_MAX);
+		sound_info.data[pattern].changed = strdup(path);
 
 	_D("The file of pattern(%s) is changed to [%s]",
 			profile->str_pattern[pattern], path);

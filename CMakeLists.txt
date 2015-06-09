@@ -15,7 +15,7 @@ SET(SRCS
 	src/sound.c
 	src/vibrator.c
 	src/devices.c
-	src/xmlparser.c
+	src/parser.c
 	src/feedback.c
 	src/dbus.c
 	${FEEDBACK_PROFILE_PATH}/src/check.c)
@@ -35,7 +35,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${FEEDBACK_PROFILE_PATH}/include)
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(pkgs REQUIRED vconf mm-keysound dlog libxml-2.0 glib-2.0 dbus-1)
+pkg_check_modules(pkgs REQUIRED vconf mm-keysound dlog glib-2.0 dbus-1)
 
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
