@@ -1,4 +1,11 @@
 <manifest>
+	<define>
+		<domain name="svi-data"/>
+	</define>
+	<assign>
+		<filesystem path="/opt/usr/share/feedback/haptic/custom" label="svi-data" type="transmutable"/>
+		<filesystem path="/opt/usr/share/feedback/led/custom" label="svi-data" type="transmutable"/>
+	</assign>
 	<request>
 		<domain name="_"/>
 	</request>

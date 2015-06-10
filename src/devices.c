@@ -92,3 +92,14 @@ void devices_play(int pattern)
 			dev->play(pattern);
 	}
 }
+
+void devices_stop(void)
+{
+	dd_list *elem;
+	const struct device_ops *dev;
+
+	DD_LIST_FOREACH(dev_head, elem, dev) {
+		if (dev->stop)
+			dev->stop();
+	}
+}

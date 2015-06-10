@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 #include <glib.h>
 
 #include "xmlparser.h"
@@ -73,7 +74,7 @@ static int xml_compare(xmlDocPtr doc, xmlNodePtr cur, const xmlChar* expr)
 	return 0;
 }
 
-xmlNodePtr xml_find(xmlDocPtr doc, const xmlChar* expr)
+xmlNodePtr xml_find(xmlDocPtr doc, const char *label, const xmlChar* expr)
 {
 	xmlNodePtr root;
 	xmlNodePtr cur;
@@ -88,7 +89,7 @@ xmlNodePtr xml_find(xmlDocPtr doc, const xmlChar* expr)
 	}
 
 	for (cur = root->children; cur != NULL; cur = cur->next) {
-		if (xmlStrcmp(cur->name, (const xmlChar*)VIBRATION))
+		if (xmlStrcmp(cur->name, (const xmlChar*)label))
 			continue;
 
 		if (!xml_compare(doc, cur, expr))
@@ -104,8 +105,6 @@ struct xmlData *xml_parse(xmlDocPtr doc, xmlNodePtr cur)
 {
 	xmlNodePtr node;
 	struct xmlData *data;
-	char *b64_data;
-	unsigned int len;
 
 	assert(doc);
 	assert(cur);
@@ -122,16 +121,29 @@ struct xmlData *xml_parse(xmlDocPtr doc, xmlNodePtr cur)
 			data->label = (char*)xmlNodeListGetString(doc, node->children, 1);
 			_D("label : %s", data->label);
 		} else if (!xmlStrcmp(node->name, (const xmlChar*)data_str[XML_DATA])) {
-			b64_data = (char *)xmlNodeListGetString(doc, node->children, 1);
-			if (b64_data != NULL) {
-				_D("b64_data : %s", b64_data);
-				data->data = g_base64_decode(b64_data, &len);
-				xmlFree(b64_data);
-			}
+			data->data = (char*)xmlNodeListGetString(doc, node->children, 1);
+			data->size = strlen(data->data);
 		}
 	}
 
 	return data;
+}
+
+int xml_decode_data(struct xmlData *data)
+{
+	char *decode;
+	gsize len;
+
+	if (!data || !data->data)
+		return -EINVAL;
+
+	_D("b64_data : %s", data->data);
+	decode = (char*)g_base64_decode(data->data, &len);
+	free(data->data);
+
+	data->data = decode;
+	data->size = (unsigned int)len;
+	return 0;
 }
 
 int xml_save(xmlDocPtr doc, const char *path)

@@ -27,17 +27,19 @@ extern "C" {
  * @file common.h
  * @brief This file contains the common information
  */
-#include <tzplatform_config.h>
 
-#define FEEDBACK_DATA_DIR			tzplatform_mkpath(TZ_USER_SHARE,"feedback")
+#define FEEDBACK_DATA_DIR			"/opt/usr/share/feedback"
 #define FEEDBACK_ORIGIN_DATA_DIR	"/usr/share/feedback"
 
 #define FEEDBACK_RETRY_CNT       1
 
 extern int callstatus;
+extern int alert_callstatus;
 
 extern const char *str_type[];
 extern const char *str_pattern[];
+
+int is_sound_mode(void);
 
 #ifdef __cplusplus
 }

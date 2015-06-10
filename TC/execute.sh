@@ -1,10 +1,6 @@
 #!/bin/sh
-export TET_INSTALL_PATH=/mnt/nfs/git/tetware/TETware
-export TET_TARGET_PATH=$TET_INSTALL_PATH/tetware-target
-export PATH=$TET_TARGET_PATH/bin:$PATH
-export LD_LIBRARY_PATH=$TET_TARGET_PATH/lib/tet3:$LD_LIBRARY_PATH
 
-export TET_ROOT=$TET_TARGET_PATH
+. ./_export_target_env.sh                    # setting environment variables
 
 export TET_SUITE_ROOT=`pwd`
 FILE_NAME_EXTENSION=`date +%s`
