@@ -23,7 +23,8 @@
 
 struct xmlData {
     char *label;
-    unsigned char *data;
+    char *data;
+	int size;
 };
 
 enum xmlType {
@@ -31,13 +32,15 @@ enum xmlType {
 	XML_DATA,
 };
 
-#define VIBRATION		"vibration"
+#define VIBRATION_STR		"vibration"
+#define SOUND_STR			"sound"
 
 xmlDocPtr xml_open(const char *xml);
 void xml_close(xmlDocPtr doc);
 
-xmlNodePtr xml_find(xmlDocPtr doc, const xmlChar* expr);
+xmlNodePtr xml_find(xmlDocPtr doc, const char *label, const xmlChar* expr);
 struct xmlData *xml_parse(xmlDocPtr doc, xmlNodePtr cur);
+int xml_decode_data(struct xmlData *data);
 int xml_save(xmlDocPtr doc, const char *path);
 void xml_free(struct xmlData* data);
 

@@ -1,0 +1,88 @@
+
+
+How to add the sound & vibration resources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In case of sound resources
+- add ./data/[target]/sound/[category]/
+- update the ./data/[target]/sound.xml file
+	<sound>
+		<label>[the pattern enum what you want to set]</label>
+		<data>[the file path]</data>
+	</sound>
+
+In case of vibration resources
+- get the b64 data of the resource using test/getdata application
+    --------------------------------------------------------------
+	| sh-4.1$ su
+	| sh-4.1# ls ./noti
+	| a.ivt
+	| sh-4.1# ./getdata ./noti
+	| <printdir:74> a.ivt
+	| [[[AQABAAoAFAAAACAfAAB/IUFBAABQAGUAcgBpAG]]] <----- b64 data
+	| (((
+	|	 !AAPeriodic)))
+	|
+	| <main:85> done
+    --------------------------------------------------------------
+- update the ./data/[target]/vibration.xml file
+	<vibration>
+		<label>[the pattern enum what you want to set]</label>
+		<data>[the b64 data]</data>
+	</vibration>
+
+
+How to test the sound & vibration resources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Preparation
+- Install Tizen sdk (https://developer.tizen.org/downloads/tizen-sdk)
+- Install Samsung USB controller
+- Test application
+	test/capi_feedback
+	test/capi_autofeedback
+- The resource for testing
+
+Prerequisite for updating the resources
+- Connect PC and Target
+- Copy test application and resource to Target on pc
+  (ex. copy to /Phone/Downloads/feedback/)
+- Execute terminal program
+  (ex. command prompt on window
+       terminal on linux)
+- Enter the below command
+    --------------------------------------------------------------
+	| user@user:~$sdb shell
+	| sh-4.1$ su
+	| sh-4.1# cd /opt/usr/media/Downloads/feedback
+	| sh-4.1# ls
+	| a.ogg capi_autofeedback capi_feedback
+    --------------------------------------------------------------
+
+How to test exisiting resource
+- Play each resource using the test application (capi_feedback)
+  (refer to include/feedback-ids.h)
+    --------------------------------------------------------------
+	| sh-4.1# ./capi_feedback
+	| Which do you want to do?
+	|		0 : Play
+	|		1 : Change the path
+	|		2 : Reset the path
+	|		others : quit
+	| Please input value : 0
+	| Please input value (exit:-1) : 37 (FEEDBACK_PATTERN_POWEROFF)
+    --------------------------------------------------------------
+
+How to test new resource
+- Change the speicifc enum's file path
+    --------------------------------------------------------------
+	| sh-4.1# ./capi_feedback
+	| Which do you want to do?
+	|		0 : Play
+	|		1 : Change the path
+	|		2 : Reset the path
+	|		others : quit
+	| Please input value : 1
+	| Please input type(sound:0,vib:1), enum, new path : 0 37 /opt/usr/media/Downloads/feedback/a.ogg
+    --------------------------------------------------------------
+

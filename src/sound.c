@@ -17,7 +17,6 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
@@ -32,199 +31,23 @@
 #include "common.h"
 #include "log.h"
 #include "devices.h"
+#include "xmlparser.h"
 
-#define FEEDBACK_SOUND_DIR		FEEDBACK_DATA_DIR"/sound"
-#define FEEDBACK_SOUND_TOUCH_DIR	"touch"
-#define FEEDBACK_SOUND_OPER_DIR		"operation"
-#define SCRIPT_INIT_LINK_WAV		FEEDBACK_ORIGIN_DATA_DIR"/init_wav_link.sh"
-#define MAX_SOUND_FILE			50
-
-static const char* sound_file_default[] = {
-	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : GENERAL */
-	FEEDBACK_SOUND_TOUCH_DIR"/touch.wav",
-	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : TEXT_NUMERIC_INPUT */
-	FEEDBACK_SOUND_TOUCH_DIR"/sip.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/sip_backspace.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/sip.wav",
-	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : DAILER */
-	FEEDBACK_SOUND_TOUCH_DIR"/key0.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key1.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key2.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key3.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key4.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key5.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key6.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key7.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key8.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/key9.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/keyasterisk.wav",
-	FEEDBACK_SOUND_TOUCH_DIR"/keysharp.wav",
-	/* TOUCH : H/W OR SOFT TOUCH : HOLD(TAP & HOLD) */
-	NULL,
-	/* TOUCH : H/W OR SOFT TOUCH : MULTI TAP */
-	NULL,
-	/* TOUCH : H/W OR SOFT TOUCH : TAP */
-	NULL,
-	/* TOUCH : H/W OR SOFT TOUCH : TAP & HOLD */
-	NULL,
-
-	/* NOTIFICATION : INCOMING : MESSAGE */
-	NULL,
-	/* NOTIFICATION : INCOMING : MESSAGE ALERT ON CALL */
-	NULL,
-	/* NOTIFICATION : INCOMING : EMAIL */
-	NULL,
-	/* NOTIFICATION : INCOMING : EMAIL ALERT ON CALL */
-	NULL,
-	/* NOTIFICATION : ALARM : WAKEUP */
-	NULL,
-	/* NOTIFICATION : ALARM : WAKEUP ALERT ON CALL */
-	NULL,
-	/* NOTIFICATION : ALARM : SCHEDULE */
-	NULL,
-	/* NOTIFICATION : ALARM : SCHEDULE ALERT ON CALL */
-	NULL,
-	/* NOTIFICATION : ALARM : TIMER */
-	NULL,
-	/* NOTIFICATION : ALARM : TIMER ALERT ON CALL */
-	NULL,
-
-	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) */
-	FEEDBACK_SOUND_OPER_DIR"/call_connect.wav",
-	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) ALERT ON CALL */
-	FEEDBACK_SOUND_OPER_DIR"/call_connect.wav",
-
-	/* OPERATION : POWER ON/OFF */
-	FEEDBACK_SOUND_OPER_DIR"/power_on.wav",
-	NULL,
-	/* OPERATION : CHARGECONN */
-	FEEDBACK_SOUND_OPER_DIR"/charger_connection.wav",
-	/* OPERATION : CHARGECONN ALERT ON CALL */
-	FEEDBACK_SOUND_OPER_DIR"/charger_connection.wav",
-	/* OPERATION : FULLCHAREGED */
-	FEEDBACK_SOUND_OPER_DIR"/fully_charged.wav",
-	/* OPERATION : FULLCHAREGED ALERT ON CALL */
-	FEEDBACK_SOUND_OPER_DIR"/fully_charged.wav",
-	/* OPERATION : LOW BATTERY */
-	FEEDBACK_SOUND_OPER_DIR"/low_battery.wav",
-	/* OPERATION : LOW BATTERY ALERT ON CALL */
-	FEEDBACK_SOUND_OPER_DIR"/low_battery.wav",
-	/* OPERATION : LOCK/UNLOCK */
-	FEEDBACK_SOUND_OPER_DIR"/lock.wav",
-	FEEDBACK_SOUND_OPER_DIR"/unlock.wav",
-	/* OPERATION : CALL CONNECT/ DISCONNECT */
-	FEEDBACK_SOUND_OPER_DIR"/call_connect.wav",
-	FEEDBACK_SOUND_OPER_DIR"/call_disconnect.wav",
-	/* OPERATION : MINUTE MINDER */
-	FEEDBACK_SOUND_OPER_DIR"/minute_minder.wav",
-	/* OPERATION : VIBRATION */
-	NULL,
-	/* OPERATION : CAMERA SHUTTER / SCREEN CAPTURE */
-	FEEDBACK_SOUND_OPER_DIR"/shutter.wav",
-	/* OPERATION : LIST RE-ORDER */
-	FEEDBACK_SOUND_OPER_DIR"/list_reorder.wav",
-	/* OPERATION : LIST SLIDER */
-	FEEDBACK_SOUND_OPER_DIR"/slider_sweep.wav",
-	/* OPERATION : VOLUME KEY */
-	FEEDBACK_SOUND_OPER_DIR"/volume_control.wav",
-};
-static char* sound_file[] = {
-	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : GENERAL */
-	NULL,
-	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : TEXT_NUMERIC_INPUT */
-	NULL,
-	NULL,
-	NULL,
-	/* TOUCH : SCREEN TOUCH : TAP(TOUCH & RELEASE) : DAILER */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	/* TOUCH : H/W OR SOFT TOUCH : HOLD(TAP & HOLD) */
-	NULL,
-	/* TOUCH : H/W OR SOFT TOUCH : MULTI TAP */
-	NULL,
-	/* TOUCH : H/W OR SOFT TOUCH : TAP */
-	NULL,
-	/* TOUCH : H/W OR SOFT TOUCH : TAP & HOLD */
-	NULL,
-
-	/* NOTIFICATION : INCOMING : MESSAGE */
-	NULL,
-	/* NOTIFICATION : INCOMING : MESSAGE ALERT ON CALL */
-	NULL,
-	/* NOTIFICATION : INCOMING : EMAIL */
-	NULL,
-	/* NOTIFICATION : INCOMING : EMAIL ALERT ON CALL */
-	NULL,
-	/* NOTIFICATION : ALARM : WAKEUP */
-	NULL,
-	/* NOTIFICATION : ALARM : WAKEUP ALERT ON CALL */
-	NULL,
-	/* NOTIFICATION : ALARM : SCHEDULE */
-	NULL,
-	/* NOTIFICATION : ALARM : SCHEDULE ALERT ON CALL */
-	NULL,
-	/* NOTIFICATION : ALARM : TIMER */
-	NULL,
-	/* NOTIFICATION : ALARM : TIMER ALERT ON CALL */
-	NULL,
-
-	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) */
-	NULL,
-	/* NOTIFICATION : GENERAL(TICKER/IM/SMS ETC) ALERT ON CALL */
-	NULL,
-
-	/* OPERATION : POWER ON/OFF */
-	NULL,
-	NULL,
-	/* OPERATION : CHARGECONN */
-	NULL,
-	/* OPERATION : CHARGECONN ALERT ON CALL */
-	NULL,
-	/* OPERATION : FULLCHAREGED */
-	NULL,
-	/* OPERATION : FULLCHAREGED ALERT ON CALL */
-	NULL,
-	/* OPERATION : LOW BATTERY */
-	NULL,
-	/* OPERATION : LOW BATTERY ALERT ON CALL */
-	NULL,
-	/* OPERATION : LOCK/UNLOCK */
-	NULL,
-	NULL,
-	/* OPERATION : CALL CONNECT/ DISCONNECT */
-	NULL,
-	NULL,
-	/* OPERATION : MINUTE MINDER */
-	NULL,
-	/* OPERATION : VIBRATION */
-	NULL,
-	/* OPERATION : CAMERA SHUTTER / SCREEN CAPTURE */
-	NULL,
-	/* OPERATION : LIST RE-ORDER */
-	NULL,
-	/* OPERATION : LIST SLIDER */
-	NULL,
-	/* OPERATION : VOLUME KEY */
-	NULL,
-};
+#define SOUND_XML					"/usr/share/feedback/sound.xml"
 
 static int sndstatus;
 static int touch_sndstatus;
-static int soundon;
+static int lock_sndstatus;
+static int camerastatus;
+static int shutter_sndstatus;
 
-static void feedback_sndstatus_cb(keynode_t *key, void* data)
+static xmlDocPtr v_doc;
+
+static char sound_file[FEEDBACK_PATTERN_END][NAME_MAX];
+
+inline int is_sound_mode(void)
 {
-	sndstatus = vconf_keynode_get_bool(key);
+	return sndstatus;
 }
 
 static void feedback_touch_sndstatus_cb(keynode_t *key, void* data)
@@ -232,19 +55,26 @@ static void feedback_touch_sndstatus_cb(keynode_t *key, void* data)
 	touch_sndstatus = vconf_keynode_get_bool(key);
 }
 
-static void feedback_soundon_cb(keynode_t *key, void* data)
+static void feedback_lock_sndstatus_cb(keynode_t *key, void* data)
 {
-	soundon = vconf_keynode_get_int(key);
+	lock_sndstatus = vconf_keynode_get_bool(key);
+}
+
+static void feedback_camerastatus_cb(keynode_t *key, void* data)
+{
+	camerastatus = vconf_keynode_get_int(key);
 }
 
 static volume_type_t get_volume_type(feedback_pattern_e pattern)
 {
 	if (pattern == FEEDBACK_PATTERN_TAP)
 		return VOLUME_TYPE_SYSTEM|VOLUME_GAIN_TOUCH;
-	else if (pattern >= FEEDBACK_PATTERN_KEY0 && pattern <= FEEDBACK_PATTERN_KEY_SHARP)
+	else if (pattern >= FEEDBACK_PATTERN_KEY0 && pattern <= FEEDBACK_PATTERN_KEY_BACK)
 		return VOLUME_TYPE_SYSTEM|VOLUME_GAIN_DIALER;
 	else if (pattern == FEEDBACK_PATTERN_VOLUME_KEY)
 		return VOLUME_TYPE_RINGTONE;
+	else if (camerastatus && shutter_sndstatus && pattern == FEEDBACK_PATTERN_SCREEN_CAPTURE)
+		return VOLUME_TYPE_FIXED;
 
 	return VOLUME_TYPE_SYSTEM;
 }
@@ -255,122 +85,121 @@ static bool get_always_alert_case(feedback_pattern_e pattern)
 	case FEEDBACK_PATTERN_WAKEUP:
 	case FEEDBACK_PATTERN_WAKEUP_ON_CALL:
 		return true;
+	case FEEDBACK_PATTERN_MESSAGE_ON_CALL:
+	case FEEDBACK_PATTERN_EMAIL_ON_CALL:
+	case FEEDBACK_PATTERN_GENERAL_ON_CALL:
+		if (alert_callstatus)
+			return true;
+		break;
+	case FEEDBACK_PATTERN_SMART_ALERT:
+	case FEEDBACK_PATTERN_SEND_SOS_MESSAGE:
+	case FEEDBACK_PATTERN_END_SOS_MESSAGE:
+	case FEEDBACK_PATTERN_CMAS:
+		return true;
+	case FEEDBACK_PATTERN_SCREEN_CAPTURE:
+		if (camerastatus && shutter_sndstatus)
+			return true;
+		break;
+	case FEEDBACK_PATTERN_OUTGOING_CALL:
+		return true;
 	default:
 		break;
 	}
 	return false;
 }
 
-static int change_symlink(const char *sym_path, const char *new_path)
+static bool get_always_off_case(feedback_pattern_e pattern)
 {
-	struct stat buf;
+	switch (pattern) {
+	case FEEDBACK_PATTERN_TAP ... FEEDBACK_PATTERN_MAX_CHARACTER:
+	case FEEDBACK_PATTERN_HOLD ... FEEDBACK_PATTERN_HW_HOLD:
+		if (!touch_sndstatus)
+			return true;
+		break;
+	case FEEDBACK_PATTERN_KEY0 ... FEEDBACK_PATTERN_KEY_BACK:
+		break;
+	case FEEDBACK_PATTERN_LOCK:
+	case FEEDBACK_PATTERN_UNLOCK:
+	case FEEDBACK_PATTERN_LOCK_SWIPE:
+	case FEEDBACK_PATTERN_UNLOCK_SWIPE:
+		if (!lock_sndstatus)
+			return true;
+		break;
+	default:
+		break;
+	}
+	return false;
+}
 
-	assert(sym_path != NULL && strlen(sym_path));
-	assert(new_path != NULL && strlen(new_path));
+static int get_xml_data(xmlDocPtr doc, feedback_pattern_e pattern, struct xmlData **data)
+{
+	xmlNodePtr cur;
+	struct xmlData *retData;
 
-	/* check symbolic link file existence */
-	if (stat(sym_path, &buf)) {
-		_E("file(%s) is not presents", sym_path);
+	cur = xml_find(doc, SOUND_STR, (const xmlChar*)str_pattern[pattern]);
+	/* This pattern does not have sound file to play */
+	if (cur == NULL)
+		return -ENOENT;
+
+	retData = xml_parse(doc, cur);
+	if (retData == NULL) {
+		_E("xml_parse fail");
 		return -EPERM;
 	}
 
-	if (unlink(sym_path) < 0)
-		_D("unlink(%s) : %s", sym_path, strerror(errno));
-
-	if (symlink(new_path, sym_path) < 0) {
-		_E("symlink(%s) : %s", sym_path, strerror(errno));
-		return -EPERM;
-	}
-
+	*data = retData;
 	return 0;
 }
 
-static int restore_default_file(feedback_pattern_e pattern)
+static void release_xml_data(struct xmlData *data)
 {
-	char default_path[PATH_MAX] = {0,};
-	const char *cur_path;
-	char *temp;
-	int ret;
+	if (data == NULL)
+		return;
 
-	cur_path = sound_file[pattern];
-	/* if there isn't cur_path, it already returns before calling this api */
-	if (cur_path == NULL || strlen(cur_path) == 0) {
-		_E("Invalid parameter : cur_path(NULL)");
-		return -EPERM;
-	}
-
-	temp = strcat(default_path, FEEDBACK_ORIGIN_DATA_DIR);
-	strcat(temp, cur_path+strlen(FEEDBACK_DATA_DIR));
-	_D("default_path : %s", default_path);
-
-	ret = change_symlink(cur_path, default_path);
-	if (ret < 0) {
-		_E("change_symlink is failed");
-		return -EPERM;
-	}
-
-	return 0;
-}
-
-static void link_init(void)
-{
-	struct stat sts;
-	int i,ret;
-	int directory = 0;
-	char default_path[PATH_MAX] = {0,};
-
-	/* Check if the directory exists; if not, create it and initialize it */
-	ret = stat(FEEDBACK_DATA_DIR, &sts);
-	if (ret == -1 && errno == ENOENT){
-		directory = 1;
-	}
-
-	/* init of sound array and link*/
-	strcat(default_path, FEEDBACK_ORIGIN_DATA_DIR);
-	for( i = 0 ; i< MAX_SOUND_FILE ; i++){
-		if ( sound_file_default[i] !=  NULL ){
-			sound_file[i] = strdup(tzplatform_mkpath3(TZ_USER_SHARE,"feedback/sound",sound_file_default[i]));
-			if (directory == 1){
-				if (symlink(default_path,sound_file[i]) < 0){
-					_W("change_symlink is failed");
-				}
-			}
-		}
-	}
+	xml_free(data);
 }
 
 static void sound_init(void)
 {
-	link_init();
+	/* xml Init */
+	v_doc = xml_open(SOUND_XML);
+	if (v_doc == NULL) {
+		_E("xml_open(%s) fail", SOUND_XML);
+		return;
+	}
 
-	/* Sound Init */
-	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) < 0)
-		_W("VCONFKEY_SETAPPL_SOUND_STATUS_BOOL ==> FAIL!!");
-
+	/* check sound status */
 	if (vconf_get_bool(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, &touch_sndstatus) < 0)
 		_W("VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL ==> FAIL!!");
 
-	if (vconf_get_int(VCONFKEY_SOUND_STATUS, &soundon) < 0)
-		_W("VCONFKEY_SOUND_STATUS ==> FAIL!!");
+	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_LOCK_BOOL, &lock_sndstatus) < 0)
+		_W("VCONFKEY_SETAPPL_SOUND_LOCK_BOOL ==> FAIL!!");
+
+	/* check camera status */
+	if (vconf_get_int(VCONFKEY_CAMERA_STATE, &camerastatus) < 0)
+		_W("VCONFKEY_CAMERA_STATE ==> FAIL!!");
+
+	/* shutter sound policy */
+	// This vconf is read just once, because this value is not changed in running time.
+	if (vconf_get_int(VCONFKEY_CAMERA_SHUTTER_SOUND_POLICY, &shutter_sndstatus) < 0)
+		_W("VCONFKEY_CAMERA_SHUTTER_SOUND_POLICY ==> FAIL!!");
 
 	/* add watch for status value */
-	vconf_notify_key_changed(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, feedback_sndstatus_cb, NULL);
 	vconf_notify_key_changed(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, feedback_touch_sndstatus_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_SOUND_STATUS, feedback_soundon_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_SETAPPL_SOUND_LOCK_BOOL, feedback_lock_sndstatus_cb, NULL);
+	vconf_notify_key_changed(VCONFKEY_CAMERA_STATE, feedback_camerastatus_cb, NULL);
 }
 
 static void sound_exit(void)
 {
-
-	int i;
-
 	/* remove watch */
-	vconf_ignore_key_changed(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, feedback_sndstatus_cb);
-	vconf_ignore_key_changed(VCONFKEY_SOUND_STATUS, feedback_soundon_cb);
 	vconf_ignore_key_changed(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, feedback_touch_sndstatus_cb);
+	vconf_ignore_key_changed(VCONFKEY_SETAPPL_SOUND_LOCK_BOOL, feedback_lock_sndstatus_cb);
+	vconf_ignore_key_changed(VCONFKEY_CAMERA_STATE, feedback_camerastatus_cb);
 
-	for(i = 0 ; i< MAX_SOUND_FILE ; i++){
-		free(sound_file[i]);
+	if (v_doc) {
+		xml_close(v_doc);
+		v_doc = NULL;
 	}
 }
 
@@ -378,97 +207,135 @@ static int sound_play(feedback_pattern_e pattern)
 {
 	struct stat buf;
 	int retry = FEEDBACK_RETRY_CNT, ret;
+	char *path;
+	struct xmlData *data = NULL;
+
+	if (!v_doc) {
+		_E("Not initialize");
+		return -EPERM;
+	}
+
+	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) < 0) {
+		_D("fail to get sound status, will work as turning off");
+		sndstatus = 0;
+	}
 
 	if (sndstatus == 0 && !get_always_alert_case(pattern)) {
 		_D("Sound condition is OFF (sndstatus : %d)", sndstatus);
 		return 0;
 	}
 
-	if (soundon == 1 && pattern >= FEEDBACK_PATTERN_TAP && pattern <= FEEDBACK_PATTERN_HW_HOLD) {
-		_D("Touch feedback sound doesn't work during playing sound");
+	if (sndstatus && get_always_off_case(pattern)) {
+		_D("Sound always off condition");
 		return 0;
 	}
 
-	if (touch_sndstatus == 0 && pattern >= FEEDBACK_PATTERN_TAP && pattern <= FEEDBACK_PATTERN_HW_HOLD) {
-		_D("Touch Sound condition is OFF and pattern is touch type (touch_sndstatus : %d, pattern : %s)", touch_sndstatus, str_pattern[pattern]);
+	/* check if the state of voice recorder is recording */
+	if (vconf_get_int(VCONFKEY_SOUND_STATUS, &ret) < 0) {
+		_D("fail to get media sound status, status will be zero");
+		ret = 0;
+	}
+
+	if (ret & VCONFKEY_SOUND_STATUS_AVRECORDING) {
+		_D("voice recording status is RECORDING");
 		return 0;
 	}
 
-	if (sound_file[pattern] == NULL) {
-		_D("This case(%s) does not play sound", str_pattern[pattern]);
-		return 0;
-	}
+	/* check whether there is a user defined file */
+	path = sound_file[pattern];
 
-	if (stat(sound_file[pattern], &buf)) {
-		_E("%s is not presents", sound_file[pattern]);
-		ret = restore_default_file(pattern);
+	/* if not */
+	if (!(*path)) {
+		ret = get_xml_data(v_doc, pattern, &data);
+		if (ret == -ENOENT) {
+			_D("No sound case(%s)", str_pattern[pattern]);
+			return 0;
+		}
+
 		if (ret < 0) {
-			_E("restore_default_file(%s) error", str_pattern[pattern]);
+			_E("get_xml_data fail");
 			return -EPERM;
 		}
-		_D("%s is restored", sound_file[pattern]);
+
+		if (!data->data) {
+			_D("No sound case(%s)", str_pattern[pattern]);
+			release_xml_data(data);
+			return 0;
+		}
+
+		path = data->data;
 	}
 
+	if (stat(path, &buf)) {
+		_E("%s is not presents", path);
+		return -ENOENT;
+	}
+
+	/* play sound file */
 	do {
-		ret = mm_sound_play_keysound(sound_file[pattern], get_volume_type(pattern));
+		ret = mm_sound_play_keysound(path, get_volume_type(pattern));
 		if (ret == MM_ERROR_NONE) {
-			_D("Play success! SND filename is %s", sound_file[pattern]);
+			_D("Play success! SND filename is %s", path);
+			release_xml_data(data);
 			return 0;
 		}
 		_E("mm_sound_play_keysound() returned error(%d)", ret);
 	} while(retry--);
 
+	release_xml_data(data);
 	return -EPERM;
 }
 
 static int sound_get_path(feedback_pattern_e pattern, char *buf, unsigned int buflen)
 {
-	const char *cur_path;
-	int retry = FEEDBACK_RETRY_CNT;
+	char *cur_path;
+	int ret = 0;
+	struct xmlData *data = NULL;
 
-	assert(buf != NULL && buflen > 0);
+	if (!buf || buflen <= 0)
+		return -EINVAL;
 
 	cur_path = sound_file[pattern];
-	if (cur_path == NULL) {
-		_E("This pattern(%s) in sound type is not supported to play", str_pattern[pattern]);
-		snprintf(buf, buflen, "NULL");
-		return -ENOENT;
+	if (!cur_path) {
+		ret = get_xml_data(v_doc, pattern, &data);
+		if (ret >= 0 && data && data->data)
+			cur_path = (char*)data->data;
 	}
 
-	do {
-		if(readlink(cur_path, buf, buflen) < 0) {
-			_E("readlink is failed : %s", strerror(errno));
-			return -EPERM;
-		}
-	} while(retry--);
+	if (!cur_path) {
+		_E("This pattern(%s) in sound type is not supported to play", str_pattern[pattern]);
+		cur_path = "NULL";
+		ret = -ENOENT;
+	}
 
+	snprintf(buf, buflen, "%s", cur_path);
+	release_xml_data(data);
 	return 0;
 }
 
 static int sound_set_path(feedback_pattern_e pattern, char *path)
 {
-	const char *cur_path;
-	int ret;
+	struct stat buf;
+	char *ppath;
 
-	assert(path != NULL);
-
-	if (access(path, F_OK) != 0) {
-		_E("Invalid parameter : path does not exist");
-		return -ENOENT;
+	/*
+	 * check the path is valid
+	 * if path is null, below operation is ignored
+	 */
+	if (path && stat(path, &buf)) {
+		_E("%s is not presents", path);
+		return -errno;
 	}
 
-	cur_path = sound_file[pattern];
-	if (cur_path == NULL) {
-		_E("This pattern(%s) in sound type is not supported to play", str_pattern[pattern]);
-		return -ENOENT;
-	}
+	ppath = sound_file[pattern];
 
-	ret = change_symlink(cur_path, path);
-	if (ret < 0) {
-		_E("change_symlink is failed");
-		return -EPERM;
-	}
+	/* if path is NULL, this pattern set to default file */
+	if (path)
+		snprintf(ppath, NAME_MAX, "%s", path);
+	else
+		memset(ppath, 0, NAME_MAX);
 
+	_D("The file of pattern(%s) is changed to [%s]", str_pattern[pattern], path);
 	return 0;
 }
 
