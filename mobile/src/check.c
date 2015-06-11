@@ -126,7 +126,6 @@ static const char *mobile_str_pattern[] =
 };
 
 static int callstatus;
-static int alert_callstatus;
 static int lock_sndstatus;
 static int camerastatus;
 static int shutter_sndstatus;
@@ -138,11 +137,6 @@ static int feedbackstatus;
 static void feedback_callstatus_cb(keynode_t *key, void* data)
 {
 	callstatus = vconf_keynode_get_int(key);
-}
-
-static void feedback_alertstatus_cb(keynode_t *key, void* data)
-{
-	alert_callstatus = vconf_keynode_get_int(key);
 }
 
 static void feedback_lock_sndstatus_cb(keynode_t *key, void* data)
@@ -181,10 +175,6 @@ static void mobile_init(void)
 	if (vconf_get_int(VCONFKEY_CALL_STATE, &callstatus) < 0)
 		_W("VCONFKEY_CALL_STATE ==> FAIL!!");
 
-	/* alert option on call */
-	if (vconf_get_int(VCONFKEY_CISSAPPL_ALERT_ON_CALL_INT, &alert_callstatus) < 0)
-		_W("VCONFKEY_CISSAPPL_ON_CALL_INT ==> FAIL!!");
-
 	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_LOCK_BOOL, &lock_sndstatus) < 0)
 		_W("VCONFKEY_SETAPPL_SOUND_LOCK_BOOL ==> FAIL!!");
 
@@ -215,7 +205,6 @@ static void mobile_init(void)
 
 	/* add watch for status value */
 	vconf_notify_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb, NULL);
-	vconf_notify_key_changed(VCONFKEY_CISSAPPL_ALERT_ON_CALL_INT, feedback_alertstatus_cb, NULL);
 	vconf_notify_key_changed(VCONFKEY_SETAPPL_SOUND_LOCK_BOOL, feedback_lock_sndstatus_cb, NULL);
 	vconf_notify_key_changed(VCONFKEY_CAMERA_STATE, feedback_camerastatus_cb, NULL);
 	vconf_notify_key_changed(VCONFKEY_SETAPPL_VIBRATE_WHEN_NOTIFICATION_BOOL, feedback_noti_vibstatus_cb, NULL);
@@ -228,7 +217,6 @@ static void mobile_exit(void)
 {
 	/* remove watch */
 	vconf_ignore_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb);
-	vconf_ignore_key_changed(VCONFKEY_CISSAPPL_ALERT_ON_CALL_INT, feedback_alertstatus_cb);
 	vconf_ignore_key_changed(VCONFKEY_SETAPPL_SOUND_LOCK_BOOL, feedback_lock_sndstatus_cb);
 	vconf_ignore_key_changed(VCONFKEY_CAMERA_STATE, feedback_camerastatus_cb);
 	vconf_ignore_key_changed(VCONFKEY_SETAPPL_VIBRATE_WHEN_NOTIFICATION_BOOL, feedback_noti_vibstatus_cb);
@@ -302,8 +290,6 @@ static bool mobile_get_always_alert_case(int type, int pattern)
 	case FEEDBACK_PATTERN_MOBILE_MESSAGE_ON_CALL:
 	case FEEDBACK_PATTERN_MOBILE_EMAIL_ON_CALL:
 	case FEEDBACK_PATTERN_MOBILE_GENERAL_ON_CALL:
-		if (alert_callstatus)
-			return true;
 		break;
 	case FEEDBACK_PATTERN_MOBILE_CHARGERCONN_ON_CALL:
 	case FEEDBACK_PATTERN_MOBILE_CHARGING_ERROR_ON_CALL:
