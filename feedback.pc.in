@@ -1,11 +1,11 @@
 prefix=@PREFIX@
 exec_prefix=@EXEC_PREFIX@
-libdir=@LIBDIR@
+libdir=@LIB_INSTALL_DIR@
 includedir=@INCLUDEDIR@
 
 Name: feedback
 Description: Feedback library for playing sound and vibration
 Version: @VERSION@
-Requires: capi-base-common
+Requires.private: capi-base-common
 Libs: -L${libdir} -lfeedback
 Cflags: -I${includedir}
