@@ -24,7 +24,7 @@ static void play(void)
 {
 	int a, b, val;
 
-	while(1) {
+	while (1) {
 		print_play_menu();
 		printf("Please enter the play menu : ");
 		scanf("%d", &a);
@@ -56,26 +56,25 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	while(1)
-	{
+	while (1) {
 		print_menu();
 		printf("Please input value : ");
 		scanf("%d", &a);
 
-		switch(a) {
+		switch (a) {
 		case 0:
 			play();
 			break;
 		case 1:
 			printf("Please input type(sound:0,vib:1), enum, new path  : ");
 			scanf("%d %d %s", &a, &b, buf);
-			val = feedback_set_resource_path( (a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, buf);
+			val = feedback_set_resource_path((a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, buf);
 			printf("ret value : %d\n", val);
 			break;
 		case 2:
 			printf("Please input type(sound:0,vib:1), enum  : ");
 			scanf("%d %d", &a, &b);
-			val = feedback_set_resource_path( (a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, NULL);
+			val = feedback_set_resource_path((a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, NULL);
 			printf("ret value : %d\n", val);
 			break;
 		default:

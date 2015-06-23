@@ -13,8 +13,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	while(1)
-	{
+	while (1) {
 		val = feedback_play(++i);
 		printf("[%2d] result : %d\n", i, val);
 		if (val < 0) break;

@@ -165,7 +165,7 @@ static int sound_play(feedback_pattern_e pattern)
 			return 0;
 		}
 		_E("mm_sound_play_keysound() returned error(%d)", ret);
-	} while(retry--);
+	} while (retry--);
 
 	return -EPERM;
 }
