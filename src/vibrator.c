@@ -35,15 +35,13 @@
 
 #define HAPTIC_DEVICE				0
 
-enum haptic_priority
-{
+enum haptic_priority {
 	HAPTIC_PRIORITY_MIN = 0,
 	HAPTIC_PRIORITY_MIDDLE,
 	HAPTIC_PRIORITY_HIGH,
 };
 
-enum haptic_iteration
-{
+enum haptic_iteration {
 	HAPTIC_ITERATION_ONCE = 1,
 	HAPTIC_ITERATION_INFINITE = 256,
 };

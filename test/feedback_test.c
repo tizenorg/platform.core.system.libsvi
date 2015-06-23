@@ -36,8 +36,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	while(1)
-	{
+	while (1) {
 		printf("Which do you want to work play(0) or change the path(1)?");
 		scanf("%d", &a);
 		if (a == 0) {
@@ -46,15 +45,15 @@ int main(int argc, char* argv[])
 			if (a == -1)
 				break;
 			val = feedback_play(a);
-			printf("ret value : %d\n", val);	
+			printf("ret value : %d\n", val);
 		} else if (a == 1) {
 			printf("Please input type(sound:0,vib:1), enum, new path  : ");
 			scanf("%d %d %s", &a, &b, buf);
-			val = feedback_get_resource_path( (a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, &temp);
+			val = feedback_get_resource_path((a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, &temp);
 			printf("Prev : %s", temp);
 			free(temp);
-			val = feedback_set_resource_path( (a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, buf);
-			val = feedback_get_resource_path( (a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, &temp);
+			val = feedback_set_resource_path((a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, buf);
+			val = feedback_get_resource_path((a == 0) ? FEEDBACK_TYPE_SOUND : FEEDBACK_TYPE_VIBRATION, b, &temp);
 			printf("Curr : %s", temp);
 			free(temp);
 		} else {

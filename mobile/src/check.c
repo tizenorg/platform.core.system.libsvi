@@ -33,16 +33,14 @@
 #endif
 
 
-static const char *mobile_str_type[] =
-{
+static const char *mobile_str_type[] = {
 	"FEEDBACK_TYPE_NONE",
 	"FEEDBACK_TYPE_SOUND",
 	"FEEDBACK_TYPE_VIBRATION",
 	"FEEDBACK_TYPE_MOBILE_LED",
 };
 
-static const char *mobile_str_pattern[] =
-{
+static const char *mobile_str_pattern[] = {
 	"FEEDBACK_PATTERN_TAP",
 	"FEEDBACK_PATTERN_SIP",
 	"FEEDBACK_PATTERN_KEY0",
@@ -183,7 +181,7 @@ static void mobile_init(void)
 		_W("VCONFKEY_CAMERA_STATE ==> FAIL!!");
 
 	/* shutter sound policy */
-	// This vconf is read just once, because this value is not changed in running time.
+	/* This vconf is read just once, because this value is not changed in running time. */
 	if (vconf_get_int(VCONFKEY_CAMERA_SHUTTER_SOUND_POLICY, &shutter_sndstatus) < 0)
 		_W("VCONFKEY_CAMERA_SHUTTER_SOUND_POLICY ==> FAIL!!");
 
@@ -200,7 +198,7 @@ static void mobile_init(void)
 		_W("VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT ==> FAIL!!");
 
 	/* feedback Init */
-	if(vconf_get_bool(VCONFKEY_SETAPPL_HAPTIC_FEEDBACK_STATUS_BOOL, &feedbackstatus) < 0)
+	if (vconf_get_bool(VCONFKEY_SETAPPL_HAPTIC_FEEDBACK_STATUS_BOOL, &feedbackstatus) < 0)
 		_W("VCONFKEY_SETAPPL_HAPTIC_FEEDBACK_STATUS_BOOL ==> FAIL!!");
 
 	/* add watch for status value */

@@ -23,15 +23,13 @@
 #include "log.h"
 
 
-static const char *common_str_type[] =
-{
+static const char *common_str_type[] = {
 	"FEEDBACK_TYPE_NONE",
 	"FEEDBACK_TYPE_SOUND",
 	"FEEDBACK_TYPE_VIBRATION",
 };
 
-static const char *common_str_pattern[] =
-{
+static const char *common_str_pattern[] = {
 	"FEEDBACK_PATTERN_TAP",
 	"FEEDBACK_PATTERN_SIP",
 	"FEEDBACK_PATTERN_KEY0",

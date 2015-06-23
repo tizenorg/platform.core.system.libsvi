@@ -83,7 +83,7 @@ int devices_play(int pattern)
 			    (prev == 0 && ret < 0))
 				prev = 0;
 			else if ((prev < 0 && ret == -ENOTSUP) ||
-			         (prev == -ENOTSUP && ret < 0))
+					(prev == -ENOTSUP && ret < 0))
 				prev = -ENOTSUP;
 			else
 				prev = ret;
