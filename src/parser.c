@@ -197,6 +197,12 @@ void feedback_free_config(struct feedback_config_info *info)
 {
 	int i;
 
+	if (!info || !(info->data))
+		return;
+
+	if (!profile)
+		return;
+
 	for (i = 0; i < profile->max_pattern; i++) {
 		if (info->data[i].origin) {
 			free(info->data[i].origin);
