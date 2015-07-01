@@ -70,10 +70,6 @@ mkdir -p %{buildroot}/opt/usr/share/feedback/haptic/custom
 
 %post -n svi-data
 
-if [ -f %{_libdir}/rpm-plugins/msm.so ]; then
-	find /opt/usr/share/feedback/ | xargs chsmack -a 'svi-data'
-fi
-
 %postun -p /sbin/ldconfig
 
 %postun -n svi-data
