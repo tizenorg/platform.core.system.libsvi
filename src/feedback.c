@@ -30,16 +30,21 @@
 #define API __attribute__ ((visibility("default")))
 #endif
 
-static bool binit;
+static unsigned int init_cnt;
+static pthread_mutex_t fmutex = PTHREAD_MUTEX_INITIALIZER;
 
 API int feedback_initialize(void)
 {
-	if (binit)
-		return FEEDBACK_ERROR_NONE;
-
+	pthread_mutex_lock(&fmutex);
 	if (!profile) {
 		_E("there is no valid profile module.");
+		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_SUPPORTED;
+	}
+
+	if (init_cnt++ > 0) {
+		pthread_mutex_unlock(&fmutex);
+		return FEEDBACK_ERROR_NONE;
 	}
 
 	/* initialize device */
@@ -49,14 +54,22 @@ API int feedback_initialize(void)
 	if (profile->init)
 		profile->init();
 
-	binit = true;
+	pthread_mutex_unlock(&fmutex);
 	return FEEDBACK_ERROR_NONE;
 }
 
 API int feedback_deinitialize(void)
 {
-	if (!binit)
+	pthread_mutex_lock(&fmutex);
+	if (!init_cnt) {
+		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
+	}
+
+	if (init_cnt-- > 1) {
+		pthread_mutex_unlock(&fmutex);
+		return FEEDBACK_ERROR_NONE;
+	}
 
 	/* deinitialize device */
 	devices_exit();
@@ -65,7 +78,7 @@ API int feedback_deinitialize(void)
 	if (profile->exit)
 		profile->exit();
 
-	binit = false;
+	pthread_mutex_unlock(&fmutex);
 	return FEEDBACK_ERROR_NONE;
 }
 
@@ -76,10 +89,13 @@ API int feedback_play(feedback_pattern_e pattern)
 	int switched;
 
 	/* check initialize */
-	if (!binit) {
+	pthread_mutex_lock(&fmutex);
+	if (!init_cnt) {
 		_E("Not initialized");
+		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
+	pthread_mutex_unlock(&fmutex);
 
 	if (pattern <= FEEDBACK_PATTERN_NONE ||
 	    pattern >= profile->max_pattern) {
@@ -120,10 +136,13 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 	int switched;
 
 	/* check initialize */
-	if (!binit) {
+	pthread_mutex_lock(&fmutex);
+	if (!init_cnt) {
 		_E("Not initialized");
+		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
+	pthread_mutex_unlock(&fmutex);
 
 	if (type <= FEEDBACK_TYPE_NONE ||
 	    type >= profile->max_type) {
@@ -170,10 +189,13 @@ API int feedback_stop(void)
 	int err;
 
 	/* check initialize */
-	if (!binit) {
+	pthread_mutex_lock(&fmutex);
+	if (!init_cnt) {
 		_E("Not initialized");
+		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
+	pthread_mutex_unlock(&fmutex);
 
 	/* stop all device */
 	err = devices_stop();
@@ -196,10 +218,13 @@ API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e p
 	int switched;
 
 	/* check initialize */
-	if (!binit) {
+	pthread_mutex_lock(&fmutex);
+	if (!init_cnt) {
 		_E("Not initialized");
+		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
+	pthread_mutex_unlock(&fmutex);
 
 	if (!status) {
 		_E("Invalid parameter : status(NULL)");
