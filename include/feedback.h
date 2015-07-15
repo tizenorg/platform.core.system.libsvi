@@ -22,8 +22,6 @@
 #include <tizen.h>
 #include <tizen_error.h>
 #include "feedback-ids.h"
-/* TODO Will be removed */
-#include "feedback-internal.h"
 
 #ifdef __cplusplus
 extern "C" {
