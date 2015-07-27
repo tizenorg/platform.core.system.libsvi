@@ -126,9 +126,12 @@ int dbus_method_sync(const char *dest, const char *path,
 	ret = dbus_message_get_args(reply, &err, DBUS_TYPE_INT32, &result, DBUS_TYPE_INVALID);
 	dbus_message_unref(reply);
 	if (!ret) {
-		_E("no message : [%s:%s] %s %s:%s-%s",
-			err.name, err.message, dest, path, interface, method);
-		dbus_error_free(&err);
+		if (dbus_error_is_set(&err)) {
+			_E("error : [%s:%s] %s %s:%s-%s",
+				err.name, err.message, dest, path, interface, method);
+			dbus_error_free(&err);
+		} else
+			_E("no message");
 		return -ENOMSG;
 	}
 
