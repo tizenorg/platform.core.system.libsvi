@@ -326,6 +326,7 @@ static int vibrator_play(feedback_pattern_e pattern)
 		ret = haptic_vibrate_buffer(v_handle, pbuf, size,
 				HAPTIC_ITERATION_ONCE,
 				level, get_priority(pattern));
+		free(pbuf);
 	} else
 		ret = haptic_vibrate_monotone(v_handle, DEFAULT_DURATION,
 				level, get_priority(pattern));
