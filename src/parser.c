@@ -215,4 +215,5 @@ void feedback_free_config(struct feedback_config_info *info)
 	}
 
 	free(info->data);
+	info->data = NULL;
 }
