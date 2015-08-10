@@ -55,6 +55,7 @@ enum haptic_iteration {
 #define METHOD_STOP                 "StopDevice"
 
 #define DEFAULT_DURATION            100
+#define SIP_DURATION                60
 
 static int vibstatus;
 static unsigned int v_handle;
@@ -233,6 +234,14 @@ static int get_priority(feedback_pattern_e pattern)
 	return HAPTIC_PRIORITY_MIDDLE;
 }
 
+static int get_duration(feedback_pattern_e pattern)
+{
+	if (pattern == FEEDBACK_PATTERN_SIP || pattern == FEEDBACK_PATTERN_SIP_BACKSPACE)
+		return SIP_DURATION;
+
+	return DEFAULT_DURATION;
+}
+
 static void vibrator_init(void)
 {
 	int ret;
@@ -275,6 +284,7 @@ static int vibrator_play(feedback_pattern_e pattern)
 	int size;
 	int ret;
 	int level;
+	int duration;
 
 	if (!v_handle) {
 		_E("Not initialize");
@@ -327,9 +337,11 @@ static int vibrator_play(feedback_pattern_e pattern)
 				HAPTIC_ITERATION_ONCE,
 				level, get_priority(pattern));
 		free(pbuf);
-	} else
-		ret = haptic_vibrate_monotone(v_handle, DEFAULT_DURATION,
+	} else {
+		duration = get_duration(pattern);
+		ret = haptic_vibrate_monotone(v_handle, duration,
 				level, get_priority(pattern));
+	}
 
 	if (ret < 0) {
 		_E("fail to play vibration");
