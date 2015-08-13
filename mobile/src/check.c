@@ -332,9 +332,8 @@ static bool mobile_get_always_off_case(int type, int pattern)
 	}
 
 	switch (pattern) {
-	case FEEDBACK_PATTERN_TAP ... FEEDBACK_PATTERN_SIP:
+	case FEEDBACK_PATTERN_TAP:
 	case FEEDBACK_PATTERN_HOLD ... FEEDBACK_PATTERN_HW_HOLD:
-	case FEEDBACK_PATTERN_MOBILE_SIP_BACKSPACE ... FEEDBACK_PATTERN_MOBILE_MAX_CHARACTER:
 		if (CHECK_SOUND(type) && !is_touch_sndstatus())
 			return true;
 		break;
