@@ -159,7 +159,7 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 		return FEEDBACK_ERROR_NOT_SUPPORTED;
 	else if (err == -ECOMM)
 		return FEEDBACK_ERROR_PERMISSION_DENIED;
-	else
+	else if (err < 0)
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 
 	return FEEDBACK_ERROR_NONE;
@@ -241,6 +241,8 @@ API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e p
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
+	*status = supported;
+
 	return FEEDBACK_ERROR_NONE;
 }
 
@@ -275,7 +277,7 @@ API int feedback_play_type_by_name(char *type, char *pattern)
 	}
 
 	if (epattern == pattern_max) {
-		_E("Invalid parameter : pattern(%d)", pattern);
+		_E("Invalid parameter : pattern(%s)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
