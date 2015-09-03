@@ -321,12 +321,12 @@ static bool mobile_get_always_off_case(int type, int pattern)
 	int ret;
 
 	/* check if the state of voice recorder is recording */
-	if (vconf_get_int(VCONFKEY_SOUND_STATUS, &ret) < 0) {
-		_D("fail to get media sound status, status will be zero");
+	if (vconf_get_int(VCONFKEY_RECORDER_STATE, &ret) < 0) {
+		_W("fail to get media sound status, status will be zero");
 		ret = 0;
 	}
 
-	if (CHECK_SOUND(type) && ret & VCONFKEY_SOUND_STATUS_AVRECORDING) {
+	if (CHECK_SOUND(type) && ret == VCONFKEY_RECORDER_STATE_RECORDING) {
 		_D("voice recording status is RECORDING");
 		return true;
 	}
