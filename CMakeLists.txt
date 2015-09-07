@@ -26,8 +26,13 @@ SET(HEADERS
 	include/feedback-internal.h)
 
 IF(NOT "${PROFILE}" STREQUAL "common")
-	SET(HEADERS ${HEADERS}
-		${FEEDBACK_PROFILE_PATH}/include/feedback-ids-${PROFILE}.h)
+	IF("${PROFILE}" STREQUAL "mobile")
+		ADD_DEFINITIONS("-DMOBILE")
+		SET(HEADERS ${HEADERS}
+			${FEEDBACK_PROFILE_PATH}/include/feedback-ids-${PROFILE}.h)
+	ELSEIF("${PROFILE}" STREQIAL "wearable")
+		ADD_DEFINITIONS("-DWEARABLE")
+	ENDIF()
 ENDIF()
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
