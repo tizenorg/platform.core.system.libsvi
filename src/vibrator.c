@@ -32,6 +32,12 @@
 #include "devices.h"
 #include "log.h"
 #include "dbus.h"
+#ifdef MOBILE
+#include "feedback-ids-mobile.h"
+#endif
+#ifdef WEARABLE
+#include "feedback-ids-wearable.h"
+#endif
 
 #define HAPTIC_DEVICE				0
 
@@ -236,9 +242,16 @@ static int get_priority(feedback_pattern_e pattern)
 
 static int get_duration(feedback_pattern_e pattern)
 {
-	if (pattern == FEEDBACK_PATTERN_SIP || pattern == FEEDBACK_PATTERN_SIP_BACKSPACE)
+	if (pattern == FEEDBACK_PATTERN_SIP)
 		return SIP_DURATION;
-
+#ifdef MOBILE
+	if (pattern == (feedback_pattern_e)FEEDBACK_PATTERN_MOBILE_SIP_BACKSPACE)
+		return SIP_DURATION;
+#endif
+#ifdef WEARABLE
+	if (pattern == (feedback_pattern_e)FEEDBACK_PATTERN_WEARABLE_SIP_BACKSPACE)
+		return SIP_DURATION;
+#endif
 	return DEFAULT_DURATION;
 }
 
