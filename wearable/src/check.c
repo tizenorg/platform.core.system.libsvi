@@ -246,6 +246,8 @@ static bool wearable_get_switched_pattern(int pattern, int *switched)
 		*switched = FEEDBACK_PATTERN_WEARABLE_FULLCHARGED_ON_CALL;
 	else if (pattern == FEEDBACK_PATTERN_LOWBATT)
 		*switched = FEEDBACK_PATTERN_WEARABLE_LOWBATT_ON_CALL;
+	else
+		return false;
 
 	return true;
 }
