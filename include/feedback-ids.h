@@ -34,9 +34,9 @@ extern "C" {
  */
 typedef enum
 {
-	FEEDBACK_TYPE_NONE,
-	FEEDBACK_TYPE_SOUND,
-	FEEDBACK_TYPE_VIBRATION,
+	FEEDBACK_TYPE_NONE,      			/**< Feedback type none */
+	FEEDBACK_TYPE_SOUND,    			/**< Feedback type for sound */
+	FEEDBACK_TYPE_VIBRATION,			/**< Feedback type for vibration */
 	FEEDBACK_TYPE_END,
 	/* TODO Will be removed */
 	FEEDBACK_TYPE_LED = FEEDBACK_TYPE_VIBRATION + 1,
