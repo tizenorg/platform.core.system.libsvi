@@ -439,8 +439,16 @@ static int vibrator_set_path(feedback_pattern_e pattern, char *path)
 
 	/*
 	 * check the path is valid
-	 * if path is null, below operation is ignored
+	 * if path is null, reset vibration path
 	 */
+	if (!path) {
+		if (vib_info.data[pattern].changed) {
+			free(vib_info.data[pattern].changed);
+			vib_info.data[pattern].changed = NULL;
+		}
+		return 0;
+	}
+
 	if (path && stat(path, &buf)) {
 		_E("%s is not presents", path);
 		return -errno;
