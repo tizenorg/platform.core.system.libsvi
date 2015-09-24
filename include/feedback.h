@@ -58,6 +58,9 @@ typedef enum
  *
  * @remarks
  * If this function is not called in advance, other function will return #FEEDBACK_ERROR_NOT_INITIALIZED.
+ * And for controlling haptic device, the privilege should be set to, %http://tizen.org/privilege/haptic.
+ * If you don't have the haptic privilege, this function initializes only sound.
+ * It does not return any error in this case.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #FEEDBACK_ERROR_NONE               Successful
@@ -73,6 +76,12 @@ int feedback_initialize(void);
  * @details This function must be called when feedback functions are no longer needed.
  *
  * @since_tizen 2.4
+ *
+ * @remarks
+ * If you don't want to use feedback anymore, you need to deinitialize with this function.
+ * And for controlling haptic device, the privilege should be set to, %http://tizen.org/privilege/haptic.
+ * If you don't have the haptic privilege, this function deinitializes only sound.
+ * It does not return any error in this case.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #FEEDBACK_ERROR_NONE                 Successful
