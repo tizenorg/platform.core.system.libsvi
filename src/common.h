@@ -20,7 +20,6 @@
 #define __COMMON_H__
 
 #include <stdbool.h>
-#include <errno.h>
 #include <mm_sound_private.h>
 
 #ifdef __cplusplus
