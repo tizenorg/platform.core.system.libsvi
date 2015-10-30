@@ -3,7 +3,7 @@ Summary:    Feedback library
 Version:    0.1.4
 Release:    1
 Group:      System/Libraries
-License:    Apache License, Version 2.0
+License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 source1:	libfeedback.manifest
 source2:	svi-data.manifest
