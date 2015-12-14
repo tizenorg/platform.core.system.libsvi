@@ -46,13 +46,7 @@ export CFLAGS+=" -DTIZEN_ENGINEER_MODE"
 cp %{SOURCE1} .
 cp %{SOURCE2} .
 
-%if "%{?tizen_profile_name}" == "wearable"
-%define PROFILE wearable
-%else if "%{?tizen_profile_name}" == "mobile"
-%define PROFILE mobile
-%endif
-
-%cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DPROFILE=%{PROFILE}
+%cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DPROFILE=%{profile}
 make
 
 %install
