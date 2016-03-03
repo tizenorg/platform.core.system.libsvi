@@ -306,7 +306,7 @@ static int vibrator_play(feedback_pattern_e pattern)
 
 	if (v_handle == -ENOTSUP) {
 		_E("Not supported vibration");
-		return -ENOTSUP;
+		return -EACCES;
 	}
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, &vibstatus) < 0) {
