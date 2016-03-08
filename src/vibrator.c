@@ -261,6 +261,11 @@ static void vibrator_init(void)
 
 	/* Vibration Init */
 	ret = haptic_open();
+	if (ret == -EACCES || ret == -ECOMM || ret == -EPERM) {
+		_E("haptic_open ==> FAIL!! : %d", ret);
+		v_handle = -EACCES;
+		return;
+	}
 	if (ret < 0) {
 		_E("haptic_open ==> FAIL!! : %d", ret);
 		v_handle = -ENOTSUP;
@@ -304,9 +309,9 @@ static int vibrator_play(feedback_pattern_e pattern)
 		return -EPERM;
 	}
 
-	if (v_handle == -ENOTSUP) {
+	if (v_handle == -ENOTSUP || v_handle == -EACCES) {
 		_E("Not supported vibration");
-		return -EACCES;
+		return v_handle;
 	}
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, &vibstatus) < 0) {
@@ -376,9 +381,9 @@ static int vibrator_stop(void)
 		return -EPERM;
 	}
 
-	if (v_handle == -ENOTSUP) {
+	if (v_handle == -ENOTSUP || v_handle == -EACCES) {
 		_E("Not supported vibration");
-		return -ENOTSUP;
+		return v_handle;
 	}
 
 	/* stop haptic device */
@@ -408,7 +413,7 @@ static int vibrator_is_supported(int pattern, bool *supported)
 		return -EPERM;
 	}
 
-	if (v_handle == -ENOTSUP) {
+	if (v_handle == -ENOTSUP || v_handle == -EACCES) {
 		_E("Not supported vibration");
 		*supported = false;
 		return 0;
