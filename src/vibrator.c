@@ -197,7 +197,7 @@ static unsigned char *convert_file_to_buffer(const char *file_name, int *size)
 	/* Get File Stream Pointer */
 	pf = fopen(file_name, "rb");
 	if (!pf) {
-		_E("fopen failed : %s", strerror(errno));
+		_E("fopen failed : %d", errno);
 		return NULL;
 	}
 
@@ -228,7 +228,7 @@ err_free:
 error:
 	fclose(pf);
 
-	_E("failed to convert file to buffer (%s)", strerror(errno));
+	_E("failed to convert file to buffer (%d)", errno);
 	return NULL;
 }
 
