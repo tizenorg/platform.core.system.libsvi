@@ -44,7 +44,7 @@ extern "C" {
 typedef enum
 {
     FEEDBACK_ERROR_NONE                = TIZEN_ERROR_NONE,                /**< Successful */
-    FEEDBACK_ERROR_OPERATION_FAILED    = TIZEN_ERROR_NOT_PERMITTED,       /**< Operation not permitted */
+    FEEDBACK_ERROR_OPERATION_FAILED    = TIZEN_ERROR_NOT_PERMITTED,       /**< Operation failed */
     FEEDBACK_ERROR_INVALID_PARAMETER   = TIZEN_ERROR_INVALID_PARAMETER,   /**< Invalid parameter */
     FEEDBACK_ERROR_NOT_SUPPORTED       = TIZEN_ERROR_NOT_SUPPORTED,       /**< Not supported in this device */
     FEEDBACK_ERROR_PERMISSION_DENIED   = TIZEN_ERROR_PERMISSION_DENIED,   /**< Permission denied */
