@@ -201,7 +201,7 @@ API int feedback_stop(void)
 	err = devices_stop();
 	if (err == -ENOTSUP)
 		return FEEDBACK_ERROR_NOT_SUPPORTED;
-	else if (err == -ECOMM)
+	else if (err == -ECOMM || err == -EACCES)
 		return FEEDBACK_ERROR_PERMISSION_DENIED;
 	else if (err < 0)
 		return FEEDBACK_ERROR_OPERATION_FAILED;

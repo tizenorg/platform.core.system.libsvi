@@ -170,6 +170,11 @@ static int sound_play(feedback_pattern_e pattern)
 	return -EPERM;
 }
 
+static int sound_stop()
+{
+	return 0;
+}
+
 static int sound_is_supported(feedback_pattern_e pattern, bool *supported)
 {
 	struct stat buf;
@@ -246,6 +251,7 @@ static const struct device_ops sound_device_ops = {
 	.init = sound_init,
 	.exit = sound_exit,
 	.play = sound_play,
+	.stop = sound_stop,
 	.is_supported = sound_is_supported,
 	.get_path = sound_get_path,
 	.set_path = sound_set_path,

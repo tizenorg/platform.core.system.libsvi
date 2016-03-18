@@ -98,11 +98,18 @@ int devices_stop(void)
 	dd_list *elem;
 	const struct device_ops *dev;
 	int ret = -ENOTSUP;
+	int prev = -EPERM;
 
 	DD_LIST_FOREACH(dev_head, elem, dev) {
-		if (dev->stop)
+		if (dev->stop) {
 			ret = dev->stop();
+			if ((prev < 0 && ret == 0) ||
+			    (prev == 0 && ret < 0))
+				prev = 0;
+			else
+				prev = ret;
+		}
 	}
 
-	return ret;
+	return prev;
 }
