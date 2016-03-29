@@ -54,8 +54,8 @@ typedef GList dd_list;
 	for (elem = head; elem && ((node = elem->data) != NULL); elem = elem->next, node = NULL)
 #endif
 
-#define FEEDBACK_DATA_DIR			"/opt/usr/share/feedback"
-#define FEEDBACK_ORIGIN_DATA_DIR	"/usr/share/feedback"
+#define FEEDBACK_DATA_DIR			FEEDBACK_SYS_SHARE"/feedback"
+#define FEEDBACK_ORIGIN_DATA_DIR	FEEDBACK_SYS_RO_SHARE"/feedback"
 
 #define FEEDBACK_RETRY_CNT       1
 

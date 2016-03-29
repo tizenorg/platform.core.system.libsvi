@@ -74,8 +74,8 @@ struct tet_testlist tet_testlist[] = {
 	{ NULL, 0 },
 };
 
-#define SOUND_FILE_PATH "/usr/share/feedback/sound/touch/touch.ogg"
-#define VIBRATION_FILE_PATH "/usr/share/deviced/HW_touch_30ms_sharp.ivt"
+#define SOUND_FILE_PATH FEEDBACK_SYS_RO_SHARE"/feedback/sound/touch/touch.ogg"
+#define VIBRATION_FILE_PATH FEEDBACK_SYS_RO_SHARE"/deviced/HW_touch_30ms_sharp.ivt"
 
 static void startup(void)
 {
