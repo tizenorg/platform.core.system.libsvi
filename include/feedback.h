@@ -54,7 +54,7 @@ typedef enum
 /**
  * @brief Initializes feedback API.
  *
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @remarks
  * If this function is not called in advance, other function will return #FEEDBACK_ERROR_NOT_INITIALIZED.
@@ -75,7 +75,7 @@ int feedback_initialize(void);
  * @brief Deinitializes feedback API.
  * @details This function must be called when feedback functions are no longer needed.
  *
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @remarks
  * If you don't want to use feedback anymore, you need to deinitialize with this function.
@@ -99,7 +99,7 @@ int feedback_deinitialize(void);
  * This functon can be used to react to pre-defined actions. \n
  * It play various types of system pre-defined media or vibration patterns.
  *
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @remarks
  * Currently, there are two types of reactions: sound and vibration. \n
@@ -130,7 +130,7 @@ int feedback_play(feedback_pattern_e pattern);
  * This function can be used to react to pre-defined actions. \n
  * It play specific type of system pre-defined pattern.
  *
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @remarks
  * Currently, there are two types of reactions: sound and vibration. \n
@@ -160,7 +160,7 @@ int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern);
  * This functon can be used to stop react to pre-defined actions. \n
  * It stops system pre-defined vibration patterns.
  *
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @remarks
  * This function does not support to stop media sound actions. \n
@@ -185,7 +185,7 @@ int feedback_stop(void);
  * @details
  * This functon can be used to check if a specific pattern is supported.
  *
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] type      The pattern type
  * @param[in] pattern   The pre-defined pattern
