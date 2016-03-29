@@ -52,7 +52,7 @@ enum haptic_iteration {
 	HAPTIC_ITERATION_INFINITE = 256,
 };
 
-#define VIBRATION_CONF_FILE         "/usr/share/feedback/vibration.conf"
+#define VIBRATION_CONF_FILE         FEEDBACK_SYS_RO_SHARE"/feedback/vibration.conf"
 
 #define METHOD_OPEN                 "OpenDevice"
 #define METHOD_CLOSE                "CloseDevice"

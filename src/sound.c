@@ -34,7 +34,7 @@
 #include "log.h"
 #include "parser.h"
 
-#define SOUND_CONF_FILE "/usr/share/feedback/sound.conf"
+#define SOUND_CONF_FILE FEEDBACK_SYS_RO_SHARE"/feedback/sound.conf"
 
 /* Temporary keys */
 #ifndef VCONFKEY_SETAPPL_BUTTON_SOUNDS_BOOL

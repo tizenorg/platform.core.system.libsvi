@@ -16,6 +16,7 @@ BuildRequires:  pkgconfig(mm-keysound)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(dbus-1)
+BuildRequires:  pkgconfig(libtzplatform-config)
 Requires(post):	svi-data
 
 %description
@@ -46,7 +47,11 @@ export CFLAGS+=" -DTIZEN_ENGINEER_MODE"
 cp %{SOURCE1} .
 cp %{SOURCE2} .
 
-%cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DPROFILE=%{profile}
+%cmake . \
+		-DCMAKE_INSTALL_PREFIX=%{_prefix} \
+		-DPROFILE=%{profile} \
+		-DTZ_SYS_RO_SHARE=%{TZ_SYS_RO_SHARE} \
+		-DTZ_SYS_SHARE=%{TZ_SYS_SHARE}
 make
 
 %install
@@ -54,10 +59,10 @@ rm -rf %{buildroot}
 %make_install
 
 mkdir -p %{buildroot}%{_datadir}/license
-cp LICENSE %{buildroot}/usr/share/license/%{name}
-cp LICENSE %{buildroot}/usr/share/license/svi-data
+cp LICENSE %{buildroot}%{_datadir}/license/%{name}
+cp LICENSE %{buildroot}%{_datadir}/license/svi-data
 
-mkdir -p %{buildroot}/opt/usr/share/feedback/haptic/custom
+mkdir -p %{buildroot}%{TZ_SYS_SHARE}/feedback/haptic/custom
 
 %post -p /sbin/ldconfig
 
@@ -67,7 +72,7 @@ mkdir -p %{buildroot}/opt/usr/share/feedback/haptic/custom
 
 %postun -n svi-data
 rm -rf %{_datadir}/feedback/
-rm -rf /opt/usr/share/feedback/
+rm -rf %{TZ_SYS_SHARE}/feedback/
 
 %files
 %defattr(-,root,root,-)
@@ -85,6 +90,6 @@ rm -rf /opt/usr/share/feedback/
 %defattr(644,root,root,-)
 %{_datadir}/feedback/*
 %defattr(666,app,app,-)
-%dir /opt/usr/share/feedback/haptic/custom
+%dir %{TZ_SYS_SHARE}/feedback/haptic/custom
 %{_datadir}/license/svi-data
 %manifest svi-data.manifest
