@@ -38,8 +38,7 @@ extern "C" {
  * @details
  *
  */
-typedef enum
-{
+typedef enum {
 	FEEDBACK_TYPE_MOBILE_LED = FEEDBACK_TYPE_END,
 	FEEDBACK_TYPE_MOBILE_END,
 } feedback_mobile_type_e;
@@ -51,8 +50,7 @@ typedef enum
  * But Depending on vendor design, pattern may not have any type of file.
  *
  */
-typedef enum
-{
+typedef enum {
 	FEEDBACK_PATTERN_MOBILE_NONE = -1,
 
 	FEEDBACK_PATTERN_MOBILE_SIP_BACKSPACE = 2, /**< feedback pattern when touch backspace key */

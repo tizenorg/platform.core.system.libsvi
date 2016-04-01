@@ -41,8 +41,7 @@ extern "C" {
  * @brief Enumerations of error codes for the Feedback API.
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
     FEEDBACK_ERROR_NONE                = TIZEN_ERROR_NONE,                /**< Successful */
     FEEDBACK_ERROR_OPERATION_FAILED    = TIZEN_ERROR_NOT_PERMITTED,       /**< Operation failed */
     FEEDBACK_ERROR_INVALID_PARAMETER   = TIZEN_ERROR_INVALID_PARAMETER,   /**< Invalid parameter */

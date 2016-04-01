@@ -40,8 +40,7 @@ extern "C" {
  * But Depending on vendor design, pattern may not have any type of file.
  *
  */
-typedef enum
-{
+typedef enum {
 	FEEDBACK_PATTERN_WEARABLE_NONE = -1,
 
 	FEEDBACK_PATTERN_WEARABLE_SIP_BACKSPACE = 2, /**< feedback pattern when touch backspace key */

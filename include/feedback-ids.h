@@ -32,8 +32,7 @@ extern "C" {
  * @brief Enumerations of the type for feedback interface
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
 	FEEDBACK_TYPE_NONE,      			/**< Feedback type none */
 	FEEDBACK_TYPE_SOUND,    			/**< Feedback type for sound */
 	FEEDBACK_TYPE_VIBRATION,			/**< Feedback type for vibration */
@@ -48,8 +47,7 @@ typedef enum
  *
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
 	FEEDBACK_PATTERN_NONE = -1,
 
 	FEEDBACK_PATTERN_TAP = 0,      					/**< Feedback pattern when general touch */
