@@ -39,7 +39,7 @@ extern "C" {
 
 /**
  * @brief Enumerations of error codes for the Feedback API.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum
 {

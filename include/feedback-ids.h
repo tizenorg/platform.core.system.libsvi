@@ -30,7 +30,7 @@ extern "C" {
 
 /**
  * @brief Enumerations of the type for feedback interface
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum
 {
@@ -46,7 +46,7 @@ typedef enum
  * Each feedback pattern can have separate media files of each types.
  * But Depending on vendor design, pattern may not have any type of file.
  *
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum
 {
