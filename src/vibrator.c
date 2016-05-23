@@ -416,7 +416,7 @@ static int vibrator_is_supported(int pattern, bool *supported)
 	if (v_handle == -ENOTSUP || v_handle == -EACCES) {
 		_E("Not supported vibration");
 		*supported = false;
-		return 0;
+		return v_handle;
 	}
 
 	/* get vibration data */

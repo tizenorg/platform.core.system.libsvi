@@ -261,7 +261,11 @@ API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e p
 	}
 
 	err = dev->is_supported(pattern, &supported);
-	if (err < 0) {
+	if (err == -ENOTSUP)
+		return FEEDBACK_ERROR_NOT_SUPPORTED;
+	else if (err == -ECOMM || err == -EACCES)
+		return FEEDBACK_ERROR_PERMISSION_DENIED;
+	else if (err < 0) {
 		_E("fail to invoke is_supported() : pattern(%s)", profile->str_pattern[pattern]);
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
