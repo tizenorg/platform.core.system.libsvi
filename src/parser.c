@@ -73,7 +73,7 @@ static int config_parse(const char *file_name,
 	/* open conf file */
 	f = fopen(file_name, "r");
 	if (!f) {
-		_E("Failed to open file %s", file_name);
+		_E("Failed to open file %s", file_name); //LCOV_EXCL_LINE
 		ret = -EIO;
 		goto error;
 	}
@@ -133,7 +133,7 @@ static int config_parse(const char *file_name,
 error:
 	if (f)
 		fclose(f);
-	_E("Failed to read %s:%d!", file_name, lineno);
+	_E("Failed to read %s:%d!", file_name, lineno); //LCOV_EXCL_LINE
 	return ret;
 }
 
@@ -162,7 +162,7 @@ static int load_config(struct parse_result *result, void *user_data)
 
 		info->data[i].origin = strdup(value);
 		if (!info->data[i].origin)
-			_E("fail to copy %s sound data",
+			_E("fail to copy %s sound data", //LCOV_EXCL_LINE
 					profile->str_pattern[i]);
 		break;
 	}
@@ -181,13 +181,13 @@ int feedback_load_config(const char *path,
 	info->data = calloc(1,
 			sizeof(struct feedback_data) * profile->max_pattern);
 	if (!info->data) {
-		_E("fail to allocate %s data", path);
-		return -ENOMEM;
+		_E("fail to allocate %s data", path); //LCOV_EXCL_LINE
+		return -ENOMEM; //LCOV_EXCL_LINE System Error
 	}
 
 	ret = config_parse(path, load_config, info);
 	if (ret < 0)
-		_E("Failed to load %s, %d Use default value!",
+		_E("Failed to load %s, %d Use default value!", //LCOV_EXCL_LINE
 				path, ret);
 
 	return ret;

@@ -116,6 +116,7 @@ static int haptic_close(unsigned int handle)
 			"u", arr);
 }
 
+//LCOV_EXCL_START Not supported feature
 static int haptic_vibrate_buffer(unsigned int handle,
 								const unsigned char *buffer,
 								int size,
@@ -146,6 +147,7 @@ static int haptic_vibrate_buffer(unsigned int handle,
 			DEVICED_INTERFACE_HAPTIC, METHOD_VIBRATE_BUFFER,
 			"uayiii", arr);
 }
+//LCOV_EXCL_STOP
 
 static int haptic_vibrate_monotone(unsigned int handle,
 								int duration,
@@ -185,6 +187,7 @@ static int haptic_vibrate_stop(unsigned int handle)
 			"u", arr);
 }
 
+//LCOV_EXCL_START Not supported feature
 static unsigned char *convert_file_to_buffer(const char *file_name, int *size)
 {
 	FILE *pf;
@@ -231,6 +234,7 @@ error:
 	_E("failed to convert file to buffer (%d)", errno);
 	return NULL;
 }
+//LCOV_EXCL_STOP
 
 static int get_priority(feedback_pattern_e pattern)
 {
@@ -262,14 +266,14 @@ static void vibrator_init(void)
 	/* Vibration Init */
 	ret = haptic_open();
 	if (ret == -EACCES || ret == -ECOMM || ret == -EPERM) {
-		_E("haptic_open ==> FAIL!! : %d", ret);
-		v_handle = -EACCES;
-		return;
+		_E("haptic_open ==> FAIL!! : %d", ret); //LCOV_EXCL_LINE
+		v_handle = -EACCES; //LCOV_EXCL_LINE System Error
+		return; //LCOV_EXCL_LINE System Error
 	}
 	if (ret < 0) {
-		_E("haptic_open ==> FAIL!! : %d", ret);
-		v_handle = -ENOTSUP;
-		return;
+		_E("haptic_open ==> FAIL!! : %d", ret); //LCOV_EXCL_LINE
+		v_handle = -ENOTSUP; //LCOV_EXCL_LINE System Error
+		return; //LCOV_EXCL_LINE System Error
 	}
 
 	/* Set vibration handle */
@@ -286,7 +290,7 @@ static void vibrator_exit(void)
 	if (v_handle > 0) {
 		ret = haptic_close(v_handle);
 		if (ret < 0)
-			_E("haptic_close is failed : %d", ret);
+			_E("haptic_close is failed : %d", ret); //LCOV_EXCL_LINE
 		v_handle = 0;
 	}
 
@@ -305,29 +309,29 @@ static int vibrator_play(feedback_pattern_e pattern)
 	int duration;
 
 	if (!v_handle) {
-		_E("Not initialize");
+		_E("Not initialize"); //LCOV_EXCL_LINE
 		return -EPERM;
 	}
 
 	if (v_handle == -ENOTSUP || v_handle == -EACCES) {
-		_E("Not supported vibration");
-		return v_handle;
+		_E("Not supported vibration"); //LCOV_EXCL_LINE
+		return v_handle; //LCOV_EXCL_LINE System Error
 	}
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL, &vibstatus) < 0) {
-		_D("fail to get vibration status, will work as turning off");
+		_D("fail to get vibration status, will work as turning off"); //LCOV_EXCL_LINE
 		vibstatus = 0;
 	}
 
 	if (vibstatus == 0 && profile->get_always_alert_case &&
 	    !profile->get_always_alert_case(FEEDBACK_TYPE_VIBRATION, pattern))  {
-		_D("Vibration condition is OFF (vibstatus : %d)", vibstatus);
+		_D("Vibration condition is OFF (vibstatus : %d)", vibstatus); //LCOV_EXCL_LINE
 		return 0;
 	}
 
 	if (vibstatus && profile->get_always_off_case &&
 	    profile->get_always_off_case(FEEDBACK_TYPE_VIBRATION, pattern)) {
-		_D("Vibration always off condition");
+		_D("Vibration always off condition"); //LCOV_EXCL_LINE
 		return 0;
 	}
 
@@ -339,12 +343,13 @@ static int vibrator_play(feedback_pattern_e pattern)
 	/* get vibration data */
 	data = get_data(pattern);
 	if (!data) {
-		_E("Not supported vibration pattern");
+		_E("Not supported vibration pattern"); //LCOV_EXCL_LINE
 		return -ENOTSUP;
 	}
 
 	/* if it has a file path */
 	if (!stat(data, &buf)) {
+//LCOV_EXCL_START Not supported feature
 		pbuf = convert_file_to_buffer(data, &size);
 		if (!pbuf) {
 			_E("fail to convert file to buffer");
@@ -355,6 +360,7 @@ static int vibrator_play(feedback_pattern_e pattern)
 				HAPTIC_ITERATION_ONCE,
 				level, get_priority(pattern));
 		free(pbuf);
+//LCOV_EXCL_STOP
 	} else {
 		duration = get_duration(pattern);
 		ret = haptic_vibrate_monotone(v_handle, duration,
@@ -362,9 +368,9 @@ static int vibrator_play(feedback_pattern_e pattern)
 	}
 
 	if (ret < 0) {
-		_E("fail to play vibration");
+		_E("fail to play vibration"); //LCOV_EXCL_LINE
 		if (ret == -ECOMM)
-			return ret;
+			return ret; //LCOV_EXCL_LINE System Error
 		return -EPERM;
 	}
 
@@ -377,21 +383,21 @@ static int vibrator_stop(void)
 	int ret;
 
 	if (!v_handle) {
-		_E("Not initialize");
+		_E("Not initialize"); //LCOV_EXCL_LINE
 		return -EPERM;
 	}
 
 	if (v_handle == -ENOTSUP || v_handle == -EACCES) {
-		_E("Not supported vibration");
-		return v_handle;
+		_E("Not supported vibration"); //LCOV_EXCL_LINE
+		return v_handle; //LCOV_EXCL_LINE System Error
 	}
 
 	/* stop haptic device */
 	ret = haptic_vibrate_stop(v_handle);
 	if (ret < 0) {
-		_E("haptic_vibrate_stop is failed");
+		_E("haptic_vibrate_stop is failed"); //LCOV_EXCL_LINE
 		if (ret == -ECOMM)
-			return ret;
+			return ret; //LCOV_EXCL_LINE System Error
 		return -EPERM;
 	}
 
@@ -404,18 +410,18 @@ static int vibrator_is_supported(int pattern, bool *supported)
 	bool ret = true;
 
 	if (!supported) {
-		_E("Invalid parameter : supported(NULL)");
+		_E("Invalid parameter : supported(NULL)"); //LCOV_EXCL_LINE
 		return -EINVAL;
 	}
 
 	if (!v_handle) {
-		_E("Not initialize");
+		_E("Not initialize"); //LCOV_EXCL_LINE
 		return -EPERM;
 	}
 
 	if (v_handle == -ENOTSUP || v_handle == -EACCES) {
-		_E("Not supported vibration");
-		*supported = false;
+		_E("Not supported vibration"); //LCOV_EXCL_LINE
+		*supported = false; //LCOV_EXCL_LINE System Error
 		return v_handle;
 	}
 
@@ -430,6 +436,7 @@ static int vibrator_is_supported(int pattern, bool *supported)
 	return 0;
 }
 
+//LCOV_EXCL_START Not used function
 static int vibrator_get_path(feedback_pattern_e pattern, char *buf, unsigned int buflen)
 {
 	char *data;
@@ -485,6 +492,7 @@ static int vibrator_set_path(feedback_pattern_e pattern, char *path)
 			profile->str_pattern[pattern], path);
 	return 0;
 }
+//LCOV_EXCL_STOP
 
 static const struct device_ops vibrator_device_ops = {
 	.type = FEEDBACK_TYPE_VIBRATION,

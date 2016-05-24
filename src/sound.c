@@ -79,6 +79,7 @@ inline int is_keytone_sndstatus(void)
 	return keytone_sndstatus;
 }
 
+//LCOV_EXCL_START Not called Callback
 static void feedback_touch_sndstatus_cb(keynode_t *key, void* data)
 {
 	touch_sndstatus = vconf_keynode_get_bool(key);
@@ -88,6 +89,7 @@ static void feedback_keytone_sndstatus_cb(keynode_t *key, void* data)
 {
 	keytone_sndstatus = vconf_keynode_get_bool(key);
 }
+//LCOV_EXCL_STOP
 
 static void sound_init(void)
 {
@@ -96,13 +98,13 @@ static void sound_init(void)
 
 	/* check sound status */
 	if (vconf_get_bool(VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL, &touch_sndstatus) < 0)
-		_W("VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_TOUCH_SOUNDS_BOOL ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_BUTTON_SOUNDS_BOOL, &keytone_sndstatus) < 0)
-		_W("VCONFKEY_SETAPPL_BUTTON_SOUNDS_BOOL ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_BUTTON_SOUNDS_BOOL ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) < 0) {
-		_D("fail to get sound status, will work as turning off");
+		_D("fail to get sound status, will work as turning off"); //LCOV_EXCL_LINE
 		sndstatus = 0;
 	}
 
@@ -129,19 +131,19 @@ static int sound_play(feedback_pattern_e pattern)
 	int level;
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &sndstatus) < 0) {
-		_D("fail to get sound status, will work as turning off");
+		_D("fail to get sound status, will work as turning off"); //LCOV_EXCL_LINE
 		sndstatus = 0;
 	}
 
 	if (sndstatus == 0 && profile->get_always_alert_case &&
 	    !profile->get_always_alert_case(FEEDBACK_TYPE_SOUND, pattern)) {
-		_D("Sound condition is OFF (sndstatus : %d)", sndstatus);
+		_D("Sound condition is OFF (sndstatus : %d)", sndstatus); //LCOV_EXCL_LINE
 		return 0;
 	}
 
 	if (sndstatus && profile->get_always_off_case &&
 	    profile->get_always_off_case(FEEDBACK_TYPE_SOUND, pattern)) {
-		_D("Sound always off condition");
+		_D("Sound always off condition"); //LCOV_EXCL_LINE
 		return 0;
 	}
 
@@ -164,7 +166,7 @@ static int sound_play(feedback_pattern_e pattern)
 			_D("Play success! SND filename is %s", path);
 			return 0;
 		}
-		_E("mm_sound_play_keysound() returned error(%d)", ret);
+		_E("mm_sound_play_keysound() returned error(%d)", ret); //LCOV_EXCL_LINE
 	} while (retry--);
 
 	return -EPERM;
@@ -177,7 +179,7 @@ static int sound_is_supported(feedback_pattern_e pattern, bool *supported)
 	bool ret = true;
 
 	if (!supported) {
-		_E("Invalid parameter : supported(NULL)");
+		_E("Invalid parameter : supported(NULL)"); //LCOV_EXCL_LINE
 		return -EINVAL;
 	}
 
@@ -192,6 +194,7 @@ static int sound_is_supported(feedback_pattern_e pattern, bool *supported)
 	return 0;
 }
 
+//LCOV_EXCL_START Not used function
 static int sound_get_path(feedback_pattern_e pattern, char *buf, unsigned int buflen)
 {
 	char *cur_path;
@@ -239,6 +242,7 @@ static int sound_set_path(feedback_pattern_e pattern, char *path)
 			profile->str_pattern[pattern], path);
 	return 0;
 }
+//LCOV_EXCL_STOP
 
 static const struct device_ops sound_device_ops = {
 	.type = FEEDBACK_TYPE_SOUND,
