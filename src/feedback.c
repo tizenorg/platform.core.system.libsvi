@@ -37,7 +37,7 @@ API int feedback_initialize(void)
 {
 	pthread_mutex_lock(&fmutex);
 	if (!profile) {
-		_E("there is no valid profile module.");
+		_E("there is no valid profile module."); //LCOV_EXCL_LINE
 		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_SUPPORTED;
 	}
@@ -91,7 +91,7 @@ API int feedback_play(feedback_pattern_e pattern)
 	/* check initialize */
 	pthread_mutex_lock(&fmutex);
 	if (!init_cnt) {
-		_E("Not initialized");
+		_E("Not initialized"); //LCOV_EXCL_LINE
 		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
@@ -107,7 +107,7 @@ API int feedback_play(feedback_pattern_e pattern)
 	if (profile->get_switched_pattern) {
 		result = profile->get_switched_pattern(pattern, &switched);
 		if (result) {
-			_W("pattern is changed : (%s) -> (%s)",
+			_W("pattern is changed : (%s) -> (%s)", //LCOV_EXCL_LINE
 					profile->str_pattern[pattern], profile->str_pattern[switched]);
 			pattern = switched;
 		}
@@ -138,7 +138,7 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 	/* check initialize */
 	pthread_mutex_lock(&fmutex);
 	if (!init_cnt) {
-		_E("Not initialized");
+		_E("Not initialized"); //LCOV_EXCL_LINE
 		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
@@ -160,7 +160,7 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 	if (profile->get_switched_pattern) {
 		result = profile->get_switched_pattern(pattern, &switched);
 		if (result) {
-			_W("pattern is changed : (%s) -> (%s)",
+			_W("pattern is changed : (%s) -> (%s)", //LCOV_EXCL_LINE
 					profile->str_pattern[pattern], profile->str_pattern[switched]);
 			pattern = switched;
 		}
@@ -169,7 +169,7 @@ API int feedback_play_type(feedback_type_e type, feedback_pattern_e pattern)
 	/* play proper device */
 	dev = find_device(type);
 	if (!dev) {
-		_E("Not supported device : type(%s)", profile->str_type[type]);
+		_E("Not supported device : type(%s)", profile->str_type[type]); //LCOV_EXCL_LINE
 		return FEEDBACK_ERROR_NOT_SUPPORTED;
 	}
 
@@ -191,7 +191,7 @@ API int feedback_stop(void)
 	/* check initialize */
 	pthread_mutex_lock(&fmutex);
 	if (!init_cnt) {
-		_E("Not initialized");
+		_E("Not initialized"); //LCOV_EXCL_LINE
 		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
@@ -220,7 +220,7 @@ API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e p
 	/* check initialize */
 	pthread_mutex_lock(&fmutex);
 	if (!init_cnt) {
-		_E("Not initialized");
+		_E("Not initialized"); //LCOV_EXCL_LINE
 		pthread_mutex_unlock(&fmutex);
 		return FEEDBACK_ERROR_NOT_INITIALIZED;
 	}
@@ -247,7 +247,7 @@ API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e p
 	if (profile->get_switched_pattern) {
 		result = profile->get_switched_pattern(pattern, &switched);
 		if (result) {
-			_W("pattern is changed : (%s) -> (%s)",
+			_W("pattern is changed : (%s) -> (%s)", //LCOV_EXCL_LINE
 					profile->str_pattern[pattern], profile->str_pattern[switched]);
 			pattern = switched;
 		}
@@ -256,17 +256,17 @@ API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e p
 	/* play proper device */
 	dev = find_device(type);
 	if (!dev) {
-		_E("Not supported device : type(%s)", profile->str_type[type]);
+		_E("Not supported device : type(%s)", profile->str_type[type]); //LCOV_EXCL_LINE
 		return FEEDBACK_ERROR_NOT_SUPPORTED;
 	}
 
 	err = dev->is_supported(pattern, &supported);
 	if (err == -ENOTSUP)
-		return FEEDBACK_ERROR_NOT_SUPPORTED;
+		return FEEDBACK_ERROR_NOT_SUPPORTED; //LCOV_EXCL_LINE System Error
 	else if (err == -ECOMM || err == -EACCES)
-		return FEEDBACK_ERROR_PERMISSION_DENIED;
+		return FEEDBACK_ERROR_PERMISSION_DENIED; //LCOV_EXCL_LINE System Error
 	else if (err < 0) {
-		_E("fail to invoke is_supported() : pattern(%s)", profile->str_pattern[pattern]);
+		_E("fail to invoke is_supported() : pattern(%s)", profile->str_pattern[pattern]); //LCOV_EXCL_LINE
 		return FEEDBACK_ERROR_OPERATION_FAILED;
 	}
 
@@ -275,6 +275,7 @@ API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e p
 	return FEEDBACK_ERROR_NONE;
 }
 
+//LCOV_EXCL_START Internal APIs. TODO Will make iUTC
 /* Internal APIs */
 API int feedback_play_type_by_name(char *type, char *pattern)
 {
@@ -375,3 +376,4 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 
 	return FEEDBACK_ERROR_NONE;
 }
+//LCOV_EXCL_STOP
