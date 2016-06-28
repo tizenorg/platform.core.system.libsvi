@@ -59,7 +59,7 @@ static int append_variant(DBusMessageIter *iter, const char *sig, char *param[])
 			dbus_message_iter_append_basic(iter, DBUS_TYPE_STRING, &param[i]);
 			break;
 		case 'a':
-			++i, ++ch;
+			++ch;
 			switch (*ch) {
 			case 'y':
 				dbus_message_iter_open_container(iter, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &arr);
@@ -126,12 +126,9 @@ int dbus_method_sync(const char *dest, const char *path,
 	ret = dbus_message_get_args(reply, &err, DBUS_TYPE_INT32, &result, DBUS_TYPE_INVALID);
 	dbus_message_unref(reply);
 	if (!ret) {
-		if (dbus_error_is_set(&err)) {
-			_E("error : [%s:%s] %s %s:%s-%s", //LCOV_EXCL_LINE
-				err.name, err.message, dest, path, interface, method);
-			dbus_error_free(&err); //LCOV_EXCL_LINE System Error
-		} else
-			_E("no message"); //LCOV_EXCL_LINE
+		_E("no message : [%s:%s] %s %s:%s-%s", //LCOV_EXCL_LINE
+			err.name, err.message, dest, path, interface, method);
+		dbus_error_free(&err); //LCOV_EXCL_LINE System Error
 		return -ENOMSG;
 	}
 

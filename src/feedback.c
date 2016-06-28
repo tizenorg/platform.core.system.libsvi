@@ -331,9 +331,6 @@ API int feedback_get_resource_path(feedback_type_e type, feedback_pattern_e patt
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
 	}
 
-	if (type == FEEDBACK_TYPE_VIBRATION)
-		return FEEDBACK_ERROR_NOT_SUPPORTED;
-
 	if (pattern <= FEEDBACK_PATTERN_NONE ||
 	    pattern >= profile->max_pattern) {
 		_E("Invalid parameter : pattern(%d)", pattern);
@@ -367,11 +364,6 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 	    pattern >= profile->max_pattern) {
 		_E("Invalid parameter : pattern(%d)", pattern);
 		return FEEDBACK_ERROR_INVALID_PARAMETER;
-	}
-
-	if (type == FEEDBACK_TYPE_VIBRATION) {
-		_E("Not supported type");
-		return FEEDBACK_ERROR_NOT_SUPPORTED;
 	}
 
 	/* proper device set path */
