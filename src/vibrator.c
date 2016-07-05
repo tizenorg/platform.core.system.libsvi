@@ -298,7 +298,7 @@ static int vibrator_is_supported(int pattern, bool *supported)
 {
 	char *temp;
 	char *data;
-	bool ret = true;
+	int ret = true;
 
 	if (!supported) {
 		_E("Invalid parameter : supported(NULL)"); //LCOV_EXCL_LINE
