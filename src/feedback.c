@@ -275,7 +275,6 @@ API int feedback_is_supported_pattern(feedback_type_e type, feedback_pattern_e p
 	return FEEDBACK_ERROR_NONE;
 }
 
-//LCOV_EXCL_START Internal APIs. TODO Will make iUTC
 /* Internal APIs */
 API int feedback_play_type_by_name(char *type, char *pattern)
 {
@@ -370,7 +369,7 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 	}
 
 	if (type == FEEDBACK_TYPE_VIBRATION) {
-		_E("Not supported type");
+		_E("Not supported type"); //LCOV_EXCL_LINE
 		return FEEDBACK_ERROR_NOT_SUPPORTED;
 	}
 
@@ -384,4 +383,3 @@ API int feedback_set_resource_path(feedback_type_e type, feedback_pattern_e patt
 
 	return FEEDBACK_ERROR_NONE;
 }
-//LCOV_EXCL_STOP

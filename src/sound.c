@@ -194,7 +194,6 @@ static int sound_is_supported(feedback_pattern_e pattern, bool *supported)
 	return 0;
 }
 
-//LCOV_EXCL_START Not used function-Internal APIs TODO Will make iUTC
 static int sound_get_path(feedback_pattern_e pattern, char *buf, unsigned int buflen)
 {
 	char *cur_path;
@@ -242,7 +241,6 @@ static int sound_set_path(feedback_pattern_e pattern, char *path)
 			profile->str_pattern[pattern], path);
 	return 0;
 }
-//LCOV_EXCL_STOP
 
 static const struct device_ops sound_device_ops = {
 	.type = FEEDBACK_TYPE_SOUND,

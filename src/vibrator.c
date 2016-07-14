@@ -235,7 +235,7 @@ static int vibrator_play(feedback_pattern_e pattern)
 
 	if (pattern <= FEEDBACK_PATTERN_NONE ||
 	    pattern >= profile->max_pattern) {
-		_E("Not supported vibration pattern");
+		_E("Not supported vibration pattern"); //LCOV_EXCL_LINE
 		return -ENOTSUP;
 	}
 
@@ -248,7 +248,7 @@ static int vibrator_play(feedback_pattern_e pattern)
 	data = trim_str(temp);
 	if (!data) {
 		free(temp);
-		_E("Not supported vibration pattern");
+		_E("Not supported vibration pattern"); //LCOV_EXCL_LINE
 		return -ENOTSUP;
 	}
 
@@ -317,7 +317,7 @@ static int vibrator_is_supported(int pattern, bool *supported)
 
 	if (pattern <= FEEDBACK_PATTERN_NONE ||
 	    pattern >= profile->max_pattern) {
-		_E("Not supported vibration pattern");
+		_E("Not supported vibration pattern"); //LCOV_EXCL_LINE
 		*supported = false;
 		return 0;
 	}
@@ -334,7 +334,7 @@ static int vibrator_is_supported(int pattern, bool *supported)
 	ret = haptic_is_supported(data);
 	free(temp);
 	if (ret < 0) {
-		_E("fail to get support information");
+		_E("fail to get support information"); //LCOV_EXCL_LINE
 		if (ret == -ECOMM)
 			return ret;
 		return -EPERM;
@@ -345,7 +345,6 @@ static int vibrator_is_supported(int pattern, bool *supported)
 	return 0;
 }
 
-//LCOV_EXCL_START Not used function-Internal APIs TODO Will make iUTC
 static int vibrator_get_path(feedback_pattern_e pattern, char *buf, unsigned int buflen)
 {
 	return 0;
@@ -355,7 +354,6 @@ static int vibrator_set_path(feedback_pattern_e pattern, char *path)
 {
 	return 0;
 }
-//LCOV_EXCL_STOP
 
 static const struct device_ops vibrator_device_ops = {
 	.type = FEEDBACK_TYPE_VIBRATION,

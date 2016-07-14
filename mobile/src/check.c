@@ -129,6 +129,7 @@ static int vib_level;
 static int noti_level;
 static int feedbackstatus;
 
+//LCOV_EXCL_START Not called Callback
 static void feedback_callstatus_cb(keynode_t *key, void* data)
 {
 	callstatus = vconf_keynode_get_int(key);
@@ -163,40 +164,41 @@ static void feedback_feedbackstatus_cb(keynode_t *key, void* data)
 {
 	feedbackstatus = vconf_keynode_get_bool(key);
 }
+//LCOV_EXCL_STOP
 
 static void mobile_init(void)
 {
 	/* check call status */
 	if (vconf_get_int(VCONFKEY_CALL_STATE, &callstatus) < 0)
-		_W("VCONFKEY_CALL_STATE ==> FAIL!!");
+		_W("VCONFKEY_CALL_STATE ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_LOCK_BOOL, &lock_sndstatus) < 0)
-		_W("VCONFKEY_SETAPPL_SOUND_LOCK_BOOL ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_SOUND_LOCK_BOOL ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	/* check camera status */
 	if (vconf_get_int(VCONFKEY_CAMERA_STATE, &camerastatus) < 0)
-		_W("VCONFKEY_CAMERA_STATE ==> FAIL!!");
+		_W("VCONFKEY_CAMERA_STATE ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	/* shutter sound policy */
 	/* This vconf is read just once, because this value is not changed in running time. */
 	if (vconf_get_int(VCONFKEY_CAMERA_SHUTTER_SOUND_POLICY, &shutter_sndstatus) < 0)
-		_W("VCONFKEY_CAMERA_SHUTTER_SOUND_POLICY ==> FAIL!!");
+		_W("VCONFKEY_CAMERA_SHUTTER_SOUND_POLICY ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	/* check vibration status */
 	if (vconf_get_bool(VCONFKEY_SETAPPL_VIBRATE_WHEN_NOTIFICATION_BOOL, &noti_vibstatus) < 0)
-		_W("VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_VIBRATION_STATUS_BOOL ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	/* check vib_level */
 	if (vconf_get_int(VCONFKEY_SETAPPL_TOUCH_FEEDBACK_VIBRATION_LEVEL_INT, &vib_level) < 0)
-		_W("VCONFKEY_FEEDBACK_VIBRATION_LEVEL_INT ==> FAIL!!");
+		_W("VCONFKEY_FEEDBACK_VIBRATION_LEVEL_INT ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	/* check noti_level */
 	if (vconf_get_int(VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT, &noti_level) < 0)
-		_W("VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_NOTI_VIBRATION_LEVEL_INT ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	/* feedback Init */
 	if (vconf_get_bool(VCONFKEY_SETAPPL_HAPTIC_FEEDBACK_STATUS_BOOL, &feedbackstatus) < 0)
-		_W("VCONFKEY_SETAPPL_HAPTIC_FEEDBACK_STATUS_BOOL ==> FAIL!!");
+		_W("VCONFKEY_SETAPPL_HAPTIC_FEEDBACK_STATUS_BOOL ==> FAIL!!"); //LCOV_EXCL_LINE
 
 	/* add watch for status value */
 	vconf_notify_key_changed(VCONFKEY_CALL_STATE, feedback_callstatus_cb, NULL);
@@ -229,7 +231,7 @@ static bool mobile_get_switched_pattern(int pattern, int *switched)
 		return false;
 
 	/* in case of call connected or connecting */
-	_D("Call status is connected or connecting.");
+	_D("Call status is connected or connecting."); //LCOV_EXCL_LINE
 	if (pattern == FEEDBACK_PATTERN_MESSAGE)
 		*switched = FEEDBACK_PATTERN_MOBILE_MESSAGE_ON_CALL;
 	else if (pattern == FEEDBACK_PATTERN_EMAIL)
@@ -319,12 +321,12 @@ static bool mobile_get_always_off_case(int type, int pattern)
 
 	/* check if the state of voice recorder is recording */
 	if (vconf_get_int(VCONFKEY_RECORDER_STATE, &ret) < 0) {
-		_W("fail to get media sound status, status will be zero");
+		_W("fail to get media sound status, status will be zero"); //LCOV_EXCL_LINE
 		ret = 0;
 	}
 
 	if (CHECK_SOUND(type) && ret == VCONFKEY_RECORDER_STATE_RECORDING) {
-		_D("voice recording status is RECORDING");
+		_D("voice recording status is RECORDING"); //LCOV_EXCL_LINE
 		return true;
 	}
 
